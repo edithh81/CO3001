@@ -2,13 +2,6 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-} from "@/components/ui/carousel";
 import AutoCarousel from "@/components/decoration/AutoCarousel";
 
 interface image {
@@ -47,9 +40,24 @@ const page = () => {
                     </Button>
                 </Link>
             </header>
-            <div className="flex justify-between w-full h-full items-center px-32">
-                <div className="font-bold text-2xl">
-                    Smart Printing Service for HCMUT Student
+            <div className="flex justify-between h-full items-center px-32 gap-32">
+                <div className="flex flex-col justify-center items-center space-y-14">
+                    <div className="flex flex-col justify-center w-full items-start space-y-4">
+                        <h1 className="font-bold text-4xl w-[500px]">
+                            Smart Printing Service for HCMUT Student
+                        </h1>
+                        <p className="text-xl text-gray-600 max-w-lg">
+                            Experience hassle-free printing with our innovative
+                            solution designed specifically for HCMUT students.
+                        </p>
+                    </div>
+
+                    <Image
+                        src={"/images/printer-image.png"}
+                        alt="printer-image"
+                        width={200}
+                        height={200}
+                    />
                 </div>
                 <div className="flex justify-center items-center">
                     <AutoCarousel />
