@@ -23,12 +23,13 @@ import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import Link from "next/link";
-
+import  loginAPI  from "@/services/LoginAPI"
+import { type } from "os";
 type SignInProps = {
     type: string;
 };
 
-const SignIn = ({ type: string }: SignInProps) => {
+const SignIn = ({ type }: SignInProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [username, setUsername] = useState("");
@@ -52,22 +53,10 @@ const SignIn = ({ type: string }: SignInProps) => {
     async function onSubmit(values: z.infer<typeof SignInSchema>) {
         // do validation here
         try {
-            // encrypt password before sending
-            /* await login(values.username, values.password).then((res) => {
-                if (res.status === 'success') {
-                    setIsLoggedInSuccess(true);
-                } else {
-                    setIsLoggedInSuccess(false);
-                }
-            }); */
-            /* await login(values.username, values.password)
-                .then((res) => {
-                    console.log(res);
-                })
-                .catch((err) => {
-                    console.log(err);
-                }); */
-            // router.push("/dashboard");
+            if (type === "student"){
+                const response = await loginAPI(values, type);
+                console.log(response)
+            }
         } catch (error) {
             console.error(error);
             // suppose to display error message here (use toast)
