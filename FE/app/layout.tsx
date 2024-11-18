@@ -13,8 +13,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="h-full no-scrollbar">
-            <body className="bg-white h-full">{children}</body>
+        <html lang="vi" className="no-scrollbar">
+            <body className="">{children}</body>
         </html>
     );
 }

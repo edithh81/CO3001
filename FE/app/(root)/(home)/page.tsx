@@ -9,6 +9,7 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
+import AutoCarousel from "@/components/decoration/AutoCarousel";
 
 interface image {
     src: string;
@@ -28,8 +29,8 @@ const images: image[] = [
 
 const page = () => {
     return (
-        <div className="min-h-screen w-full flex flex-col">
-            <header className="w-full flex justify-between items-center p-4 border-b-2 border-b-black">
+        <div className="flex flex-col justify-between items-center w-full h-full">
+            <header className="w-full flex justify-between items-center p-4 border-b border-b-black">
                 <div className="flex justify-between items-center space-x-2">
                     <Image
                         src="/images/logobk.png"
@@ -46,26 +47,13 @@ const page = () => {
                     </Button>
                 </Link>
             </header>
-
-            <div className="flex-grow relative">
-                <Carousel className="absolute inset-0">
-                    <CarouselContent className="h-full">
-                        {images.map((image, index) => (
-                            <CarouselItem key={index} className="h-full">
-                                <div className="relative w-full h-full">
-                                    <Image
-                                        src={image.src}
-                                        alt={image.alt}
-                                        fill
-                                        objectFit="cover"
-                                    />
-                                </div>
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="left-4" />
-                    <CarouselNext className="right-4" />
-                </Carousel>
+            <div className="flex justify-between w-full h-full items-center px-32">
+                <div className="font-bold text-2xl">
+                    Smart Printing Service for HCMUT Student
+                </div>
+                <div className="flex justify-center items-center">
+                    <AutoCarousel />
+                </div>
             </div>
         </div>
     );
