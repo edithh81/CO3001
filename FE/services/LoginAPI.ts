@@ -1,16 +1,13 @@
 import { Credentials } from "@/types";
 import { authAPI } from "@/api";
 
-const loginAPI = async (credentials: Credentials, type: string) => {
+const loginAPI = async (values: { username: string; password: string }, type: string) => {
     try {
-        const formData = new FormData();
-        for (const key in credentials) {
-            formData.append(key, credentials[key]);
-        }
-
-        const response = await authAPI.post(`/auth/${type}`, formData);
-
-        return response;
+        const response = await authAPI.post('/login/student', {
+            username: values.username,
+            password: values.password,
+        });
+        return response.data;
     } catch (error) {
         console.log("API Error:", error);
         throw error;
