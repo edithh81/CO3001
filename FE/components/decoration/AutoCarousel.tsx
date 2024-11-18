@@ -26,8 +26,10 @@ const images: Image[] = [
 
 export default function AutoCarousel() {
     return (
-        <Carousel plugins={[Autoplay({ delay: 4000 })]} className="max-w-xl ">
-            <CarouselContent className="">
+        <Carousel
+            plugins={[Autoplay({ delay: 4000 })]}
+            className="max-w-2xl min-w-[300px] ">
+            <CarouselContent className="items-center">
                 {images.map((image, index) => (
                     <CarouselItem key={index}>
                         <div className="relative">

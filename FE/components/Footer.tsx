@@ -1,16 +1,20 @@
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 const Footer = () => {
     return (
-        <div className="w-full flex justify-between items-center bg-[#030391] p-4">
+        <div className="w-full flex justify-between items-center bg-main p-4">
             <div className="flex flex-col justify-center items-center">
-                <Image
-                    src={"/images/logowithborder.png"}
-                    alt="logo"
-                    width={100}
-                    height={100}
-                />
+                <Link href="/">
+                    <Image
+                        src={"/images/logowithborder.png"}
+                        alt="logo"
+                        width={100}
+                        height={100}
+                    />
+                </Link>
+
                 <p className="text-white text-base">
                     Student Smart Printing Service
                 </p>

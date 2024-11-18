@@ -28,7 +28,7 @@ type SignInProps = {
     type: string;
 };
 
-const SignIn = ({ type: string }: SignInProps) => {
+const SignIn = ({ type }: SignInProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [username, setUsername] = useState("");
@@ -77,9 +77,9 @@ const SignIn = ({ type: string }: SignInProps) => {
     return (
         <Card className="w-[400px] h-fit">
             <CardHeader>
-                <CardTitle>Sign In</CardTitle>
+                <CardTitle>Đăng nhập</CardTitle>
                 <CardDescription>
-                    Provide login credentials to sign you in
+                    Vui lòng cung cấp thông tin đăng nhập của bạn
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -93,12 +93,18 @@ const SignIn = ({ type: string }: SignInProps) => {
                             render={({ field }) => (
                                 <FormItem className="flex w-full flex-col">
                                     <FormLabel className="paragraph-semibold">
-                                        Username
+                                        {type == "student"
+                                            ? "BKNetID"
+                                            : "Tên đăng nhập"}
                                     </FormLabel>
                                     <FormControl className="mt-1">
                                         <Input
                                             className="no-focus border"
-                                            placeholder="Enter your username here"
+                                            placeholder={`${
+                                                type == "student"
+                                                    ? "Ví dụ: hcmut.spss"
+                                                    : "admin"
+                                            }`}
                                             {...field}
                                         />
                                     </FormControl>
@@ -112,12 +118,12 @@ const SignIn = ({ type: string }: SignInProps) => {
                             render={({ field }) => (
                                 <FormItem className="flex w-full flex-col">
                                     <FormLabel className="paragraph-semibold">
-                                        Password
+                                        Mật khẩu
                                     </FormLabel>
                                     <FormControl className="mt-1">
                                         <Input
-                                            className="no-fcous border"
-                                            placeholder="Enter your password here"
+                                            className="no-focus border"
+                                            placeholder="Nhập mật khẩu"
                                             type="password"
                                             {...field}
                                         />
@@ -126,8 +132,10 @@ const SignIn = ({ type: string }: SignInProps) => {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" className="w-full">
-                            Sign In
+                        <Button
+                            type="submit"
+                            className="w-full bg-main hover:bg-main/90 active:bg-main/95">
+                            Đăng nhập
                         </Button>
                     </form>
                 </Form>
