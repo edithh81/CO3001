@@ -1,12 +1,12 @@
 import React from "react";
 import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-
+import AuthProvider from "@/context/AuthContext";
+import { Toaster } from "@/components/ui/toaster";
 const layout = ({ children }: { children: React.ReactNode }) => {
     return (
         <main className="relative w-full h-full flex flex-col justify-between">
-            <Header />
             <div className="flex min-w-full flex-grow">{children}</div>
+            <Toaster />
             <Footer />
         </main>
     );

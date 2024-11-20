@@ -90,6 +90,6 @@ class LoginData(BaseModel):
 async def login_hcmut(data: LoginData):
     result = await login(data.username, data.password)
     if result['success']:
-        return {'student_name': result['student_name'], 'student_id': result['student_id'], 'student_image': result['student_image']}
+        return {'success': True, 'student_name': result['student_name'], 'student_id': result['student_id'], 'student_image': result['student_image']}
     else:
         raise HTTPException(status_code=401, detail=result["message"])
