@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-
+import AuthProvider from "@/context/AuthContext";
 export const metadata: Metadata = {
     title: "HCMUT SPSS",
     description: "Stupid printing system",
@@ -14,7 +14,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="vi" className="no-scrollbar">
-            <body className="">{children}</body>
+            <body className="">
+                <AuthProvider>{children}</AuthProvider>
+            </body>
         </html>
     );
 }

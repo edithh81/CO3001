@@ -1,6 +1,6 @@
-import React from "react";
+import React, { use, useState, useEffect } from "react";
 
-const page = () => {
+const page = ({ params }: { params: Promise<{ requestId: string }> }) => {
     return <div>page</div>;
 };
 
