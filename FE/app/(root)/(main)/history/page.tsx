@@ -28,8 +28,18 @@ const page = () => {
             {time: "17/11/2024 12:30 - 13:00", printer: "010", fileName: "report.pdf", size: "A3", pages: 5},
         ];
         setPrintHistory(mockData);
-        setTotalA4(mockData.filter((item) => item.size === "A4").length);
-        setTotalA3(mockData.filter((item) => item.size === "A3").length);
+        const tempA4 = mockData.filter((item) => item.size === "A4");
+        const tempA3 = mockData.filter((item) => item.size === "A3");
+        let a4 = 0;
+        let a3 = 0;
+        for (let i = 0; i < tempA4.length; i++) {
+            a4 += tempA4[i].pages;
+        }
+        for (let i = 0; i < tempA3.length; i++) {
+            a3 += tempA3[i].pages;
+        }
+        setTotalA4(a4);
+        setTotalA3(a3);
         console.log(startDate, endDate);
     };
     
