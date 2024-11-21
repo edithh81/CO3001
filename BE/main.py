@@ -27,4 +27,4 @@ app.include_router(printers_router, prefix="")
 app.include_router(verification_router_student, prefix="")
 
 
-uvicorn.run(app,host="localhost", port=8000)
+uvicorn.run(app,host="localhost", port=8000, reload=True)
