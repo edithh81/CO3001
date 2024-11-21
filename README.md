@@ -21,7 +21,7 @@ pip install -r requirements.txt
 Second, run the development server:
 
 ```bash
-python main.py
+uvicorn main:app --reload
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
