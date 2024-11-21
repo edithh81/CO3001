@@ -12,6 +12,17 @@ Second, run the development server:
 ```bash
 npm run dev
 ```
+BE:
+First, go to BE folder, install all dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+Second, run the development server:
+
+```bash
+python main.py
+```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
