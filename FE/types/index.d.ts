@@ -18,12 +18,13 @@ export type printLog = {
 };
 
 export type printerDetail = {
+    campusId?: number;
     id: number;
     room: string;
     queue: number;
     info: {
         model: string;
-        type: string;
-        functional: string;
+        type: string; // "bw" | "color"
+        functional: string; // "1 page, 2 page, scan"
     };
 };
