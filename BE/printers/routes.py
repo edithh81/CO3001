@@ -3,7 +3,13 @@ from pydantic import BaseModel
 from db import db
 
 router = APIRouter()
-
+"""
+printer 
+id (Primary Key): Unique identifier for each printer.
+room: The room where the printer is located.
+campus: The campus where the printer is located.
+info: JSON field containing additional printer details like model, type, and function.
+"""
 @router.get("/printers/{campus}")
 async def get_printers(campus: str):
     query = """

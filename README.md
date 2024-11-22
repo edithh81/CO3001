@@ -12,7 +12,8 @@ Second, run the development server:
 ```bash
 npm run dev
 ```
-BE:
+BE: 
+We use fastAPI to get and post data. After run the server successfully, you can access http://localhost:8000/docs for document or test API.
 First, go to BE folder, install all dependencies:
 ```bash
 pip install -r requirements.txt
