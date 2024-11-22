@@ -49,5 +49,5 @@ For better understanding, try to look at libs/validation.ts, and components/form
 
 For better UI components, you can use: https://ui.shadcn.com/docs
 
-Database: PosgresSQL
+Database: PosgresSQL (Neon Serverless)
 
