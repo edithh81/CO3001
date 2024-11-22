@@ -1,17 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-from databases import Database
-import os
+from db import db
 # from history.routes import router as history_router
 from printers.routes import router as printers_router
 from verification.student.routes import router as verification_router_student
+from history.printing.routes import router as history_router_printing
 
 
 app = FastAPI()
-load_dotenv()
-database_url = os.getenv("DATABASE_URL")
-database = Database(database_url)
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -20,8 +17,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.on_event("startup")
+async def startup():
+    await db.connect()
 
+@app.on_event("shutdown") 
+async def shutdown():
+    await db.disconnect()
+    
 # Include routers
 # app.include_router(history_router, prefix="/api")
 app.include_router(printers_router, prefix="")
 app.include_router(verification_router_student, prefix="")
+app.include_router(history_router_printing, prefix="")
