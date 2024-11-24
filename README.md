@@ -7,6 +7,13 @@ First, go to FE folder, install all dependencies:
 npm i -f
 ```
 
+Create an .env file inside FE folder. with following details:
+NEXT_PUBLIC_BACKEND_API_URL="http://localhost:8000"
+NEXT_PUBLIC_ADMIN_USERNAME="hcmut.spss"
+NEXT_PUBLIC_ADMIN_PASSWORD="password"
+NEXT_PUBLIC_FILE_UPLOAD_API_URL="https://tyv91o1ov3.execute-api.ap-southeast-2.amazonaws.com/v1/filestoprint"
+
+
 Second, run the development server:
 
 ```bash
