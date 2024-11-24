@@ -10,6 +10,12 @@ interface AuthContextProps {
     isLoggedIn: boolean;
     studentInfo: StudentData;
     studentAvatar: string;
+    isAdmin: boolean;
+    adminLogin: (
+        username: string,
+        password: string
+    ) => { message: string } | { error: string };
+    adminLogout: () => void;
     login: (
         values: { username: string; password: string },
         type: string
@@ -33,20 +39,26 @@ interface AuthProviderProps {
 
 const COOKIE_NAME = "studentData";
 const COOKIE_OPTIONS = {
-    expires: 60000,
+    expires: 1,
     sameSite: "strict" as const,
     path: "/",
 };
+
+const COOKIE_NAME_ADMIN = "adminData";
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [student, setStudent] = useState<StudentData>({} as StudentData);
     const [studentAvatar, setStudentAvatar] = useState<string>("");
     const [isInitialized, setIsInitialized] = useState<boolean>(false);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
     useEffect(() => {
         const storeStudent = Cookies.get(COOKIE_NAME);
-
+        const storeAdmin = Cookies.get(COOKIE_NAME_ADMIN);
+        if (storeAdmin) {
+            setIsAdmin(true);
+        }
         if (storeStudent) {
             setStudent(JSON.parse(storeStudent));
             setIsLoggedIn(true);
@@ -101,17 +113,45 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     };
 
+    const adminLogin = (
+        username: string,
+        password: string
+    ): { message: string } | { error: string } => {
+        if (
+            username == process.env.NEXT_PUBLIC_ADMIN_USERNAME &&
+            password == process.env.NEXT_PUBLIC_ADMIN_PASSWORD
+        ) {
+            setIsAdmin(true);
+            Cookies.set(COOKIE_NAME_ADMIN, "admin", COOKIE_OPTIONS);
+            return { message: "Login successfully" };
+        } else {
+            return { error: "Invalid credentials" };
+        }
+    };
+
+    const adminLogout = () => {
+        setIsAdmin(false);
+        Cookies.remove(COOKIE_NAME_ADMIN, { path: "/" });
+    };
+
     const logout = async () => {
         updateAuthState({} as StudentInfo, false);
     };
 
     if (!isInitialized) {
-        return <div>Loading...</div>;
+        return (
+            <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-20 w-20 border-b-2 border-gray-900" />
+            </div>
+        );
     }
 
     return (
         <AuthContext.Provider
             value={{
+                isAdmin,
+                adminLogin,
+                adminLogout,
                 isLoggedIn,
                 studentInfo: student,
                 studentAvatar,

@@ -22,6 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { getPrinter } from "@/services/GetPrinters";
 
 const page = ({ params }: { params: Promise<{ campus: string }> }) => {
     const { campus } = use(params);
@@ -35,6 +36,20 @@ const page = ({ params }: { params: Promise<{ campus: string }> }) => {
         const res = printerCampus.filter((item) => item.campus === campus);
         setPrinterList(res[0].printers);
         setInitPrinterList(res[0].printers);
+
+        /* const fetchPrinters = async () => {
+            await getPrinter(campus).then((res) => {
+                if ("error" in res) {
+                    console.log("Error getting printers:", res.error);
+                } else {
+                    setPrinterList(res);
+                    setInitPrinterList(res);
+                }
+            });
+        };
+        fetchPrinters(); */
+
+        // setPrinterList
     }, []);
 
     useEffect(() => {
@@ -53,43 +68,21 @@ const page = ({ params }: { params: Promise<{ campus: string }> }) => {
     //perform some sorting here
     const handleSort = (value: string) => {
         if (value === "least-queue") {
-            var SortedPrinters: printerDetail[] = [];
-            if (printerList.length > 0) {
-                SortedPrinters = [...printerList].sort(
-                    (a, b) => a.queue - b.queue
-                );
-            } else {
-                SortedPrinters = [...initPrinterList].sort(
-                    (a, b) => a.queue - b.queue
-                );
-            }
+            const SortedPrinters: printerDetail[] = [...initPrinterList].sort(
+                (a, b) => a.queue - b.queue
+            );
             setPrinterList(SortedPrinters);
         } else if (value.startsWith("type-")) {
             const type = value.split("-")[1];
-            var sortedPrinters: printerDetail[] = [];
-            if (printerList.length > 0) {
-                sortedPrinters = [...printerList].filter(
-                    (printer) => printer.info.type === type
-                );
-            } else {
-                sortedPrinters = [...initPrinterList].filter(
-                    (printer) => printer.info.type === type
-                );
-            }
-
+            const sortedPrinters = [...initPrinterList].filter((printer) =>
+                printer.info.type.includes(type)
+            );
             setPrinterList(sortedPrinters);
         } else if (value.startsWith("func-")) {
             const func = value.split("-")[1];
-            var sortedPrinters: printerDetail[] = [];
-            if (printerList.length > 0) {
-                sortedPrinters = [...printerList].filter(
-                    (printer) => printer.info.functional === func
-                );
-            } else {
-                sortedPrinters = [...initPrinterList].filter(
-                    (printer) => printer.info.functional === func
-                );
-            }
+            const sortedPrinters = [...initPrinterList].filter((printer) =>
+                printer.info.functional.includes(func)
+            );
             setPrinterList(sortedPrinters);
         } else if (value === "default") {
             setPrinterList(initPrinterList);
@@ -129,9 +122,6 @@ const page = ({ params }: { params: Promise<{ campus: string }> }) => {
                                     </SelectGroup>
                                     <SelectGroup>
                                         <SelectLabel>Loại máy in</SelectLabel>
-                                        <SelectItem value="type-laser">
-                                            Laser
-                                        </SelectItem>
                                         <SelectItem value="type-color">
                                             In màu
                                         </SelectItem>
@@ -155,24 +145,26 @@ const page = ({ params }: { params: Promise<{ campus: string }> }) => {
                             </Select>
                         </div>
                     </div>
-                    <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6">
-                        {displayPrinters.length > 0 ? (
-                            displayPrinters.map((printer) => (
-                                <PrinterCard
-                                    key={printer.id}
-                                    id={printer.id}
-                                    room={printer.room}
-                                    queue={printer.queue}
-                                    info={printer.info}
-                                />
-                            ))
-                        ) : (
-                            <div className="flex justify-center items-center w-full">
-                                <p className="font-bold text-xl">
-                                    Không có máy in nào.
-                                </p>
-                            </div>
-                        )}
+                    <div className="flex justify-center items-center w-full">
+                        <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6">
+                            {displayPrinters.length > 0 ? (
+                                displayPrinters.map((printer) => (
+                                    <PrinterCard
+                                        key={printer.id}
+                                        id={printer.id}
+                                        room={printer.room}
+                                        queue={printer.queue}
+                                        info={printer.info}
+                                    />
+                                ))
+                            ) : (
+                                <div className="flex justify-center items-center w-full">
+                                    <p className="font-bold text-xl">
+                                        Không có máy in nào.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

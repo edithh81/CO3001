@@ -28,7 +28,7 @@ const CampusCard = ({ id, campusName, total, available }: campusProps) => {
                 <p>Máy sẵn dùng: {available}</p>
             </CardContent>
             <CardFooter>
-                <Link href={`/printer-list/${id}`} className="w-full">
+                <Link href={`/printers/${id}`} className="w-full">
                     <Button className="bg-main hover:bg-[#030391]/90 px-10 py-6 font-bold w-full text-lg">
                         Chọn
                     </Button>
