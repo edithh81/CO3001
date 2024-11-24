@@ -45,13 +45,27 @@ const PrinterCard = ({ id, room, queue, info }: printerDetail) => {
                                         <span className="font-bold">
                                             Loại máy in:
                                         </span>{" "}
-                                        {info.type}
+                                        {info.type
+                                            .map((type) =>
+                                                type == "bw"
+                                                    ? "Đen trắng"
+                                                    : "Màu"
+                                            )
+                                            .join(", ")}
                                     </p>
                                     <p>
                                         <span className="font-bold">
                                             Chức năng:
                                         </span>{" "}
-                                        {info.functional}
+                                        {info.functional
+                                            .map((functional) =>
+                                                functional == "single"
+                                                    ? "In 1 mặt"
+                                                    : functional == "double"
+                                                    ? "In 2 mặt"
+                                                    : "Scan"
+                                            )
+                                            .join(", ")}
                                     </p>
                                 </CardContent>
                             </Card>

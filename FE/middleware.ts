@@ -9,15 +9,23 @@ export function middleware(request: NextRequest) {
 
     const isAuthenticated = !!request.cookies.get("studentData");
 
+    const isAdmin = !!request.cookies.get("adminData");
+    console.log(isAdmin);
     // User is authenticated and trying to access auth routes
     if (isAuthenticated && authRoutes.includes(pathname)) {
         const dashboardUrl = new URL("/dashboard", request.url);
         return NextResponse.redirect(dashboardUrl);
     }
 
+    if (isAdmin && authRoutes.includes(pathname)) {
+        const dashboardUrl = new URL("/admin/dashboard", request.url);
+        return NextResponse.redirect(dashboardUrl);
+    }
+
     // User is NOT authenticated and trying to access any path other than auth routes
     if (
         !isAuthenticated &&
+        !isAdmin &&
         !authRoutes.includes(pathname) &&
         pathname !== "/"
     ) {

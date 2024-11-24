@@ -31,7 +31,7 @@ type SignInProps = {
 };
 
 const SignIn = ({ type }: SignInProps) => {
-    const { login, isLoggedIn } = useAuth();
+    const { login, isLoggedIn, adminLogin, isAdmin } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -41,7 +41,11 @@ const SignIn = ({ type }: SignInProps) => {
             const callbackUrl = searchParams.get("callbackUrl");
             router.replace(callbackUrl || "/dashboard");
         }
-    }, [isLoggedIn, router, searchParams]);
+        if (isAdmin) {
+            const callbackUrl = searchParams.get("callbackUrl");
+            router.replace(callbackUrl || "/admin/dashboard");
+        }
+    }, [isLoggedIn, router, searchParams, isAdmin]);
 
     const form = useForm<z.infer<typeof SignInSchema>>({
         resolver: zodResolver(SignInSchema),
@@ -79,6 +83,24 @@ const SignIn = ({ type }: SignInProps) => {
                         console.error(error);
                     });
                 console.log(response);
+            }
+            if (type === "admin") {
+                const response = adminLogin(values.username, values.password);
+                if ("error" in response) {
+                    toast({
+                        title: "Đăng nhập thất bại",
+                        description: response.error,
+                        variant: "destructive",
+                    });
+                } else {
+                    toast({
+                        title: "Đăng nhập thành công",
+                        description: "Chào mừng bạn trở lại",
+                        variant: "default",
+                        className: "bg-green-500 text-white border-none",
+                    });
+                    router.push("/admin/dashboard");
+                }
             }
         } catch (error) {
             console.error(error);

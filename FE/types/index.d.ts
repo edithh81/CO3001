@@ -22,9 +22,32 @@ export type printerDetail = {
     id: number;
     room: string;
     queue: number;
+    status?: string;
     info: {
         model: string;
-        type: string; // "bw" | "color"
-        functional: string; // "1 page, 2 page, scan"
+        type: string[]; // "bw" | "color"
+        functional: string[]; // "one-side | two-side | scan"
     };
+};
+
+export type PrintingOrder = {
+    printerId: number;
+    fileName: string;
+    byStudent: string;
+    fileId: string;
+    specifications: {
+        pages: string;
+        size: string;
+        functional: string; //"single" | "double" | "scan"
+        type: string; //"bw" | "color"
+        additionalInfo?: string;
+        copies: number;
+    };
+    totalPages: number;
+};
+
+export type UploadData = Omit<PrintingOrder["specifications"], "pages"> & {
+    file: FileList;
+    pageRange: "all" | "range";
+    rangeValue?: string;
 };
