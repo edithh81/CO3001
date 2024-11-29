@@ -18,7 +18,7 @@ export type printLog = {
 };
 
 export type printerDetail = {
-    campusId?: number;
+    campusId?: string;
     id: number;
     room: string;
     queue: number;
@@ -31,6 +31,7 @@ export type printerDetail = {
 };
 
 export type PrintingOrder = {
+    orderId?: number;
     printerId: number;
     fileName: string;
     byStudent: string;
@@ -44,10 +45,32 @@ export type PrintingOrder = {
         copies: number;
     };
     totalPages: number;
+    status: string;
+    at: string;
+    campus: string;
+};
+
+export type PrintingOrderTrue = Omit<PrintingOrder, "orderId"> & {
+    orderId: number;
 };
 
 export type UploadData = Omit<PrintingOrder["specifications"], "pages"> & {
     file: FileList;
     pageRange: "all" | "range";
     rangeValue?: string;
+};
+
+export type BuyPaperOrder = {
+    orderId?: number;
+    byStudent: string;
+    A3?: number;
+    A4?: number;
+    total: number;
+    status: string;
+    at: string;
+    method: string;
+};
+
+export type BuyPaperOrderTrue = Omit<BuyPaperOrder, "orderId"> & {
+    orderId: number;
 };

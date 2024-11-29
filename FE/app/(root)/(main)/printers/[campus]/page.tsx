@@ -155,6 +155,7 @@ const page = ({ params }: { params: Promise<{ campus: string }> }) => {
                                         room={printer.room}
                                         queue={printer.queue}
                                         info={printer.info}
+                                        campusId={campus}
                                     />
                                 ))
                             ) : (

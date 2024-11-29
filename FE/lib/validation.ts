@@ -21,3 +21,16 @@ export const uploadSchema = z.object({
     copies: z.number().int().min(1, "Minimum 1 copy required"),
     additionalInfo: z.string().optional(),
 });
+
+export const printingSpecsSchema = z.object({
+    defaultPagesA4: z.number().min(0, "Must be a positive number"),
+    defaultPagesA3: z.number().min(0, "Must be a positive number"),
+    resetStartDate: z.date(),
+    resetEndDate: z.date(),
+    resetPeriod: z.enum(["daily", "weekly", "monthly", "quarterly", "yearly"]),
+    permittedFileTypes: z
+        .array(z.string())
+        .min(1, "Select at least one file type"),
+});
+
+export type PrintingSpecsFormValues = z.infer<typeof printingSpecsSchema>;

@@ -16,7 +16,8 @@ import {
 import { Button } from "../ui/button";
 import { printerDetail } from "@/types";
 import Link from "next/link";
-const PrinterCard = ({ id, room, queue, info }: printerDetail) => {
+import { campus } from "@/lib/constants";
+const PrinterCard = ({ id, room, queue, info, campusId }: printerDetail) => {
     return (
         <Card className="bg-sky-300 rounded-lg px-4 flex justify-center items-center flex-col">
             <CardHeader>
@@ -74,7 +75,7 @@ const PrinterCard = ({ id, room, queue, info }: printerDetail) => {
                 </CardDescription>
             </CardContent>
             <CardFooter>
-                <Link href={`/upload/${id}`} className="w-full">
+                <Link href={`${campusId}/upload/${id}`} className="w-full">
                     <Button className="bg-main hover:bg-[#030391]/90 text-white">
                         Chọn
                     </Button>
