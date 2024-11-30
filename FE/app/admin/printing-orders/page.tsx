@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
-import { getTotalOrderPrinting } from "@/services/GetHistoryPrinting";
+import { getTotalOrderPrinting } from "@/services/PrintingOrderService";
 import { PrintingOrderTrue } from "@/types";
 import { useRouter } from "next/navigation";
 
@@ -361,7 +361,8 @@ const page = () => {
                                                     router.push(
                                                         `./printing-orders/${order.orderId}`
                                                     );
-                                                }}>
+                                                }}
+                                                className="cursor-pointer">
                                                 <TableCell>
                                                     {order.orderId}
                                                 </TableCell>

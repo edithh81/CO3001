@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { UploadData, PrintingOrder, printerDetail } from "@/types";
 import { calculatePageCount } from "@/hooks/use-pdfjs";
 import { uploadSchema } from "@/lib/validation";
-import { getPrinterSpec } from "@/services/GetPrinters";
+import { getPrinterSpec } from "@/services/PrinterService";
 import { useAuth } from "@/context/AuthContext";
 import { usePDFJS } from "@/hooks/use-pdfjs";
 import { useToast } from "@/hooks/use-toast";

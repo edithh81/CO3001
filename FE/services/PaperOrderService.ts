@@ -1,7 +1,7 @@
 import api from "@/api";
 import { BuyPaperOrder } from "@/types";
 
-const getHistoryBuyPaper = async (studentId: string) => {
+export const getHistoryBuyPaper = async (studentId: string) => {
     try {
         const response = await api.get(`/history/buy-paper/${studentId}`);
         return response;
@@ -10,8 +10,6 @@ const getHistoryBuyPaper = async (studentId: string) => {
         throw error;
     }
 };
-
-export default getHistoryBuyPaper;
 
 //admin
 
@@ -38,3 +36,8 @@ export const getOrderBuyPaperByStudentId = async (studentId: string) => {
         throw error;
     }
 };
+
+export const updatePaperOrderStatus = async (
+    orderId: number,
+    status: string
+) => {};

@@ -18,9 +18,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Check, Cross, X } from "lucide-react";
 import { BuyPaperOrderTrue } from "@/types";
-import { getTotalOrderBuyPaper } from "@/services/GetHistoryBuyPaper";
+import { getTotalOrderBuyPaper } from "@/services/PaperOrderService";
 import { set } from "zod";
 
 type SortKey = keyof Pick<
@@ -82,6 +82,37 @@ export default function Page() {
         }); */
         setOrders(sampleOrders);
     }, []);
+
+    const handleApprove = (
+        orderId: number,
+        studentId: string,
+        A3: number,
+        A4: number
+    ) => {
+        // updatePaperOrderStatus(orderId, "completed");
+        // updateStudentBalance(studentId, A3, "A3");
+        // updateStudentBalance(studentId, A4, "A4");
+        console.log("Approve order", orderId, studentId, A3, A4);
+        setOrders(
+            orders.map((order) =>
+                order.orderId === orderId
+                    ? { ...order, status: "completed" }
+                    : order
+            )
+        );
+    };
+
+    const handleReject = (orderId: number) => {
+        // updatePaperOrderStatus(orderId, "rejected");
+        console.log("Reject order", orderId);
+        setOrders(
+            orders.map((order) =>
+                order.orderId === orderId
+                    ? { ...order, status: "rejected" }
+                    : order
+            )
+        );
+    };
 
     const sortOrders = (ordersToSort: BuyPaperOrderTrue[]) => {
         return [...ordersToSort].sort((a, b) => {
@@ -178,6 +209,7 @@ export default function Page() {
                                 <SortButton column="at" />
                             </TableHead>
                             <TableHead>Phương thức thanh toán</TableHead>
+                            <TableHead>Hành động</TableHead>
                             <TableHead>Chỉnh sửa trạng thái</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -200,6 +232,29 @@ export default function Page() {
                                     {new Date(order.at).toLocaleString()}
                                 </TableCell>
                                 <TableCell>{order.method}</TableCell>
+                                <TableCell className="flex justify-start items-center space-x-2">
+                                    <Button
+                                        size="icon"
+                                        className="bg-green-500 text-white hover:bg-green-500/90"
+                                        onClick={() =>
+                                            handleApprove(
+                                                order.orderId,
+                                                order.byStudent,
+                                                order.A3 ? order.A3 : 0,
+                                                order.A4 ? order.A4 : 0
+                                            )
+                                        }>
+                                        <Check />
+                                    </Button>
+                                    <Button
+                                        size="icon"
+                                        className="bg-red-500 text-white hover:bg-red-500/90"
+                                        onClick={() =>
+                                            handleReject(order.orderId)
+                                        }>
+                                        <X />
+                                    </Button>
+                                </TableCell>
                                 <TableCell>
                                     <Select
                                         value={statusEdit}

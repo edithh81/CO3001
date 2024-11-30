@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { getPrinter } from "@/services/GetPrinters";
-import { getTotalOrderPrinting } from "@/services/GetHistoryPrinting";
-import { getTotalOrderBuyPaper } from "@/services/GetHistoryBuyPaper";
+import { getPrinter } from "@/services/PrinterService";
+import { getTotalOrderPrinting } from "@/services/PrintingOrderService";
+import { getTotalOrderBuyPaper } from "@/services/PaperOrderService";
 import { BuyPaperOrder, printerDetail, PrintingOrder } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";

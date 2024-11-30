@@ -2,7 +2,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { PrintingOrder } from "@/types";
-import { getOrderById, updateOrderStatus } from "@/services/GetHistoryPrinting";
+import {
+    getOrderById,
+    updateOrderStatus,
+} from "@/services/PrintingOrderService";
 import PrintingOrderViewCard from "@/components/card/PrintingOrderViewCard";
 
 const mockData: PrintingOrder = {

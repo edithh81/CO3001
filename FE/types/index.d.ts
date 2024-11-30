@@ -17,18 +17,23 @@ export type printLog = {
     pages: number;
 };
 
-export type printerDetail = {
-    campusId?: string;
+export type PrinterType = "bw" | "color";
+export type PrinterFunctional = "single" | "double" | "scan";
+export type PrinterStatus = "working" | "maintenance";
+export type CampusId = "cs1" | "cs2";
+
+export interface printerDetail {
     id: number;
+    campusId?: CampusId;
     room: string;
     queue: number;
-    status?: string;
+    status: PrinterStatus;
     info: {
         model: string;
-        type: string[]; // "bw" | "color"
-        functional: string[]; // "one-side | two-side | scan"
+        type: PrinterType[];
+        functional: PrinterFunctional[];
     };
-};
+}
 
 export type PrintingOrder = {
     orderId?: number;
@@ -73,4 +78,11 @@ export type BuyPaperOrder = {
 
 export type BuyPaperOrderTrue = Omit<BuyPaperOrder, "orderId"> & {
     orderId: number;
+};
+
+export type Student = {
+    studentId: string;
+    name: string;
+    A3: number;
+    A4: number;
 };
