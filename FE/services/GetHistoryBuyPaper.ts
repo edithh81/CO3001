@@ -1,4 +1,5 @@
 import api from "@/api";
+import { BuyPaperOrder } from "@/types";
 
 const getHistoryBuyPaper = async (studentId: string) => {
     try {
@@ -14,10 +15,12 @@ export default getHistoryBuyPaper;
 
 //admin
 
-export const getTotalOrderBuyPaper = async () => {
+export const getTotalOrderBuyPaper = async (): Promise<
+    { error: string } | BuyPaperOrder[]
+> => {
     try {
         const response = await api.get(`/orders/buy-paper`);
-        return response;
+        return response.data;
     } catch (error) {
         console.log("Error getting history of buy paper:", error);
         throw error;

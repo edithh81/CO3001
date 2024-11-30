@@ -1,5 +1,14 @@
 "use client";
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import {
+    Calendar,
+    Home,
+    NotebookText,
+    Search,
+    Settings,
+    Printer,
+    PrinterCheck,
+    User,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
     Sidebar,
@@ -19,27 +28,32 @@ import { useRouter } from "next/navigation";
 const items = [
     {
         title: "Dashboard",
-        url: "./dashboard",
+        url: "/admin/dashboard",
         icon: Home,
     },
     {
         title: "Printing Orders",
-        url: "./printing-orders",
-        icon: Inbox,
+        url: "/admin/printing-orders",
+        icon: PrinterCheck,
     },
     {
         title: "Buy paper Orders",
-        url: "./buy-paper-orders",
-        icon: Calendar,
+        url: "/admin/buy-paper-orders",
+        icon: NotebookText,
     },
     {
         title: "Printers List",
-        url: "./printer-list",
-        icon: Search,
+        url: "/admin/printer-list",
+        icon: Printer,
+    },
+    {
+        title: "Students",
+        url: "/admin/student",
+        icon: User,
     },
     {
         title: "Printing Specifications",
-        url: "./specifications",
+        url: "/admin/specifications",
         icon: Settings,
     },
 ];
@@ -53,18 +67,18 @@ export function AppSidebar() {
     };
     return (
         <Sidebar>
-            <SidebarContent>
+            <SidebarContent className="flex flex-col justify-between min-h-screen py-6 items-start w-full">
                 <SidebarGroup>
                     <SidebarGroupLabel className="font-bold text-xl">
                         Bảng điều khiển
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
-                        <SidebarMenu className="flex flex-col space-y-4">
+                        <SidebarMenu className="flex flex-col space-y-6 pt-6">
                             {items.map((item) => (
-                                <SidebarMenuItem key={item.title}>
+                                <SidebarMenuItem key={item.title} className="">
                                     <SidebarMenuButton asChild>
                                         <Link href={item.url}>
-                                            <item.icon />
+                                            <item.icon className="hover:text-white hover:bg-white text-white" />
                                             <Button
                                                 variant="link"
                                                 className="text-white font-semibold text-lg p-0">
@@ -77,9 +91,9 @@ export function AppSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
-                <SidebarFooter>
+                <SidebarFooter className="flex justify-center items-center w-full">
                     <Button
-                        className="text-white"
+                        className="text-white w-3/4 bg-blue-400 hover:bg-blue-400/90 "
                         onClick={() => handleLogout()}>
                         Log out
                     </Button>

@@ -5,3 +5,11 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 // utils.ts
+
+export const formatPrice = (price: number): string => {
+    return price.toLocaleString("en-US", {
+        style: "currency",
+        currency: "VND",
+        currencyDisplay: "code",
+    });
+};

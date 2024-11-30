@@ -1,5 +1,6 @@
 "use client";
 import { use, useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,12 +42,10 @@ const allowFileTypes = [".pdf", ".doc", ".docx"];
 
 type PrinterSpec = Pick<printerDetail["info"], "type" | "functional">;
 
-export default function page({
-    params,
-}: {
-    params: Promise<{ printerId: number }>;
-}) {
-    const { printerId } = use(params);
+export default function page() {
+    const params = useParams();
+    const printerId = params.printerId;
+    const campus = params.campus;
     const { studentInfo } = useAuth();
     const [pageCount, setPageCount] = useState<number | null>(null);
     const [expectedPages, setExpectedPages] = useState<number | null>(null);
@@ -210,7 +209,7 @@ export default function page({
                     className: "bg-green-500 text-white border-none",
                 });
                 const order: PrintingOrder = {
-                    printerId: printerId,
+                    printerId: Number(printerId),
                     fileName: file.name,
                     byStudent: studentInfo.studentId,
                     specifications: {
@@ -224,6 +223,9 @@ export default function page({
                     },
                     totalPages: expectedPages!,
                     fileId: res.message,
+                    status: "pending",
+                    at: new Date().toISOString(),
+                    campus: campus as string,
                 };
 
                 console.log("Submitted order:", order);
