@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 from bs4 import BeautifulSoup
+from db import db
 
 async def login(user:str, password: str):
     login_data = {
@@ -83,6 +84,14 @@ class LoginData(BaseModel):
 async def login_hcmut(data: LoginData):
     result = await login(data.username, data.password)
     if result['success']:
+        # insert to db student has not existed
+        query = """
+        INSERT INTO student (student_id, total_a3, total_a4)
+        VALUES (:student_id, 20, 20)
+        ON CONFLICT (student_id) DO NOTHING;"""
+        
+        await db.execute(query, {'student_id': result['student_id']})
+        
         return {'success':True,'student_name': result['student_name'], 'student_id': result['student_id'], 'student_image': result['student_image']}
     else:
         raise HTTPException(status_code=401, detail=result["message"])
