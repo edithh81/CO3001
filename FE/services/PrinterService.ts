@@ -1,11 +1,11 @@
 import api from "@/api";
-import { printerDetail } from "@/types";
+import { printerDetail, printerDetailCreate } from "@/types";
 
 export const getPrinter = async (
     campusId: string
 ): Promise<printerDetail[] | { error: string }> => {
     try {
-        const response = await api.get(`/printers/${campusId}`);
+        const response = await api.get(`/printers/campus/${campusId}`);
         return response.data;
     } catch (error) {
         console.log("Error getting printers:", error);
@@ -17,7 +17,7 @@ export const getPrinterSpec = async (
     printerId: string
 ): Promise<printerDetail | { error: string }> => {
     try {
-        const response = await api.get(`/printer/${printerId}`);
+        const response = await api.get(`/printers/id/${printerId}`);
         return response.data;
     } catch (error) {
         console.log("Error getting printer specs:", error);
@@ -29,7 +29,7 @@ export const getAllPrinters = async (): Promise<
     printerDetail[] | { error: string }
 > => {
     try {
-        const response = await api.get(`/printers/getAll`);
+        const response = await api.get(`/printers/all`);
         return response.data;
     } catch (error) {
         console.log("Error getting all printers:", error);
@@ -37,9 +37,9 @@ export const getAllPrinters = async (): Promise<
     }
 };
 
-export const addPrinter = async (printer: printerDetail) => {
+export const addPrinter = async (printer: printerDetailCreate) => {
     try {
-        const response = await api.post(`/printers`, printer);
+        const response = await api.post(`/printers/addnew`, printer);
         return response;
     } catch (error) {
         console.log("Error adding printer:", error);
@@ -49,7 +49,7 @@ export const addPrinter = async (printer: printerDetail) => {
 
 export const updatePrinter = async (printer: printerDetail) => {
     try {
-        const response = await api.put(`/printers/${printer.id}`, printer);
+        const response = await api.put(`/printers/update/${printer.id}`, printer);
         return response;
     } catch (error) {
         console.log("Error updating printer:", error);
@@ -59,7 +59,7 @@ export const updatePrinter = async (printer: printerDetail) => {
 
 export const deletePrinter = async (printerId: number) => {
     try {
-        const response = await api.delete(`/printers/${printerId}`);
+        const response = await api.delete(`/printers/delete/${printerId}`);
         return response;
     } catch (error) {
         console.log("Error deleting printer:", error);

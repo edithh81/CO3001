@@ -6,7 +6,7 @@ export const getStudentInfo = async (
     studentId: string
 ): Promise<Student | { error: string }> => {
     try {
-        const response = await axios.get(`/student/${studentId}`);
+        const response = await axios.get(`/students/student/${studentId}`);
         if (!response) {
             return { error: "Student not found" };
         }
@@ -29,15 +29,15 @@ export const getAllStudents = async (): Promise<
     }
 };
 
-export const addStudent = async (student: Student) => {
-    try {
-        const response = await api.post(`/students/add`, student);
-        return response.data;
-    } catch (error) {
-        console.log("Error adding student:", error);
-        return { error: "Internal server error" };
-    }
-};
+// export const addStudent = async (student: Student) => {
+//     try {
+//         const response = await api.post(`/students/add`, student);
+//         return response.data;
+//     } catch (error) {
+//         console.log("Error adding student:", error);
+//         return { error: "Internal server error" };
+//     }
+// };
 
 export const updateStudentBalance = async (
     studentId: string,
