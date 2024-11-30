@@ -13,3 +13,14 @@ export const formatPrice = (price: number): string => {
         currencyDisplay: "code",
     });
 };
+
+export const formatDate = (isoString: string) =>
+    new Date(isoString)
+        .toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        })
+        .replace(",", "");

@@ -31,7 +31,7 @@ import { usePDFJS } from "@/hooks/use-pdfjs";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { uploadFileToCDN } from "@/services/FileAction";
-import { set } from "zod";
+import { createOrder } from "@/services/PrintingOrderService";
 
 const pageLeft = {
     A4: 30,
@@ -229,6 +229,17 @@ export default function page() {
                 };
 
                 console.log("Submitted order:", order);
+                createOrder(order).then((res) => {
+                    if ("error" in res) {
+                        toast({
+                            title: "Thất bại",
+                            description: "Không tạo được order",
+                            variant: "destructive",
+                        });
+                    } else {
+                        router.push(`/success/${res.orderId}`);
+                    }
+                });
                 // const orderId = await createOrder(order)
                 // router.push(`/success/${orderId}`);
             }

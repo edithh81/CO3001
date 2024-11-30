@@ -23,7 +23,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { getPrinter } from "@/services/PrinterService";
+import { getPrintersByCampus } from "@/services/PrinterService";
 
 // gonna fix type later, easy fix
 
@@ -37,20 +37,17 @@ const page = () => {
     const [displayPrinters, setDisplayPrinters] = useState<printerDetail[]>([]);
     const printerPerPage = 8;
     useEffect(() => {
-        const res = printerCampus.filter((item) => item.campusId === campus);
-        setPrinterList(res);
-        setInitPrinterList(res);
-
-        /* getPrinter(campus).then((res) => {
+        getPrintersByCampus(campus).then((res) => {
             if ("error" in res) {
                 console.log("Error getting printers:", res.error);
             } else {
-                setPrinterList(res);
-                setInitPrinterList(res);
+                const workingPrinters = res.filter(
+                    (printer) => printer.status === "working"
+                );
+                setPrinterList(workingPrinters);
+                setInitPrinterList(workingPrinters);
             }
-        }); */
-
-        // setPrinterList
+        });
     }, []);
 
     useEffect(() => {

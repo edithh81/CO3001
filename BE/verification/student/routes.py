@@ -112,7 +112,7 @@ async def get_student_by_id(student_id: str):
     result = await db.fetch_one(query, {"student_id": student_id})
     
     if not result:
-        raise HTTPException(status_code=404, detail="No student found for the specified id.")
+        return {'success': False, 'data': []}
     trans_result = {
         'studentId': result['student_id'],
         'name': result['student_name'],
@@ -130,7 +130,7 @@ async def get_all_students():
     result = await db.fetch_all(query)
     
     if not result:
-        raise HTTPException(status_code=404, detail="No student found.")
+        return {'success': False, 'data': []}
     
     results = [
         {

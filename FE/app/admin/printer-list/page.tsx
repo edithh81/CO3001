@@ -20,7 +20,11 @@ import AddPrinterDialog from "@/components/dialog/AddPrinterDialog";
 import PrinterDetailsDialog from "@/components/dialog/PrinterDetailDialog";
 import { useToast } from "@/hooks/use-toast";
 import { printerDetail, CampusId, PrinterStatus } from "@/types";
-
+import {
+    getAllPrinters,
+    updatePrinter,
+    deletePrinter,
+} from "@/services/PrinterService";
 interface PrintersPageState {
     currentPage: number;
     itemsPerPage: number;
@@ -169,14 +173,17 @@ export default function page() {
     const { toast } = useToast();
 
     useEffect(() => {
-        /* getPrinters().then((res) => {
+        getAllPrinters().then((res) => {
             if ("error" in res) {
                 console.error("Error getting printers:", res.error);
             } else {
+                res.forEach((printer) => {
+                    printer.info = JSON.parse(printer.info);
+                });
                 setPrinters(res);
             }
-        }); */
-        setPrinters(mockPrinters);
+        });
+        //setPrinters(mockPrinters);
     }, []);
 
     const filteredAndSortedPrinters = useMemo(() => {

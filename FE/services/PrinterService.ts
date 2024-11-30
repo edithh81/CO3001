@@ -1,18 +1,6 @@
 import api from "@/api";
 import { printerDetail, printerDetailCreate } from "@/types";
 
-export const getPrinter = async (
-    campusId: string
-): Promise<printerDetail[] | { error: string }> => {
-    try {
-        const response = await api.get(`/printers/campus/${campusId}`);
-        return response.data;
-    } catch (error) {
-        console.log("Error getting printers:", error);
-        return { error: "Error getting printers" };
-    }
-};
-
 export const getPrinterSpec = async (
     printerId: string
 ): Promise<printerDetail | { error: string }> => {
@@ -30,7 +18,19 @@ export const getAllPrinters = async (): Promise<
 > => {
     try {
         const response = await api.get(`/printers/all`);
-        return response.data;
+        return response.data.data;
+    } catch (error) {
+        console.log("Error getting all printers:", error);
+        throw error;
+    }
+};
+
+export const getPrintersByCampus = async (
+    campus: string
+): Promise<printerDetail[] | { error: string }> => {
+    try {
+        const response = await api.get(`/printers/campus/${campus}`);
+        return response.data.data;
     } catch (error) {
         console.log("Error getting all printers:", error);
         throw error;
@@ -49,7 +49,10 @@ export const addPrinter = async (printer: printerDetailCreate) => {
 
 export const updatePrinter = async (printer: printerDetail) => {
     try {
-        const response = await api.put(`/printers/update/${printer.id}`, printer);
+        const response = await api.put(
+            `/printers/update/${printer.id}`,
+            printer
+        );
         return response;
     } catch (error) {
         console.log("Error updating printer:", error);

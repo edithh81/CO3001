@@ -1,24 +1,15 @@
 import api from "@/api";
 import { PrintingOrder, PrintingOrderTrue } from "@/types";
 
-// export const getHistoryPrinting = async (studentId: string) => {
-//     try {
-//         const response = await api.get(`/orders/printing/stuid/${studentId}`);
-//         return response;
-//     } catch (error) {
-//         console.log("Error getting history of printing:", error);
-//         throw error;
-//     }
-// };
-
-export async function createOrder(params: PrintingOrder) {
+export async function createOrder(
+    params: PrintingOrder
+): Promise<{ orderId: number } | { error: string }> {
     try {
-        // THIS WOULD RETURN AN ORDER ID
         const response = await api.post(`/orders/create`, params);
-        return response;
+        return { orderId: Number(response.data.data) };
     } catch (error) {
         console.log("Error creating order:", error);
-        throw error;
+        return { error: "Internal server error" };
     }
 }
 
@@ -28,7 +19,14 @@ export const getTotalOrderPrinting = async (): Promise<
 > => {
     try {
         const response = await api.get(`/orders/printing/all`);
-        return response.data;
+
+        response.data.data.forEach((order) => {
+            order.specifications = JSON.parse(order.specifications);
+        });
+
+        console.log("response", response.data.data);
+
+        return response.data.data;
     } catch (error) {
         console.log("Error getting history of printing:", error);
         throw error;
@@ -59,8 +57,9 @@ export const getOrderById = async (
     orderId: number
 ): Promise<PrintingOrder | { error: string }> => {
     try {
-        const response = await api.get(`/orders/printing/${orderId}`);
-        return response.data;
+        const response = await api.get(`/orders/printing/byOrderId/${orderId}`);
+        const { specifications, ...rest } = response.data.data;
+        return { ...rest, specifications: JSON.parse(specifications) };
     } catch (error) {
         return { error: "Internal server error" };
     }

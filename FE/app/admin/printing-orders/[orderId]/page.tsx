@@ -33,14 +33,14 @@ const page = () => {
     console.log(orderId);
     const [orderDetail, setOrderDetail] = useState<PrintingOrder>();
     useEffect(() => {
-        /* getOrderById(Number(orderId)).then((res) => {
+        getOrderById(Number(orderId)).then((res) => {
             if ("error" in res) {
                 console.log("Error getting order detail");
                 return;
             }
             setOrderDetail(res);
-        }); */
-        setOrderDetail(mockData);
+        });
+        /* setOrderDetail(mockData); */
     }, []);
 
     const handleComplete = (comment: string) => {

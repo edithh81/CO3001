@@ -19,7 +19,7 @@ async def get_all_payment_orders():
     results = await db.fetch_all("SELECT * FROM buy_paper_ord")
     
     if not results:
-        raise HTTPException(status_code=404, detail="No payment orders found.")
+        return {'success': False, 'data': []}
     trans_result = [
         {
             'orderId': result['id'],
@@ -40,7 +40,7 @@ async def get_all_payment_orders_by_student(student_id: str):
     results = await db.fetch_all("SELECT * FROM buy_paper_ord WHERE student_id = :student_id", {"student_id": student_id})
     
     if not results:
-        raise HTTPException(status_code=404, detail="No payment orders found for the specified student.")
+        return {'success': False, 'data': []}
     trans_result = [{
             'orderId': result['id'],
             'byStudent': result['student_id'],

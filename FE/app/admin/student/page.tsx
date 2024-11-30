@@ -14,14 +14,14 @@ const mockStudents: Student[] = [
 export default function Home() {
     const [students, setStudents] = useState<Student[]>([]);
     useEffect(() => {
-        /* getAllStudents().then((res) => {
+        getAllStudents().then((res) => {
             if ("error" in res) {
                 console.log("Error getting students:", res.error);
             } else {
                 setStudents(res);
             }
-        }); */
-        setStudents(mockStudents);
+        });
+        /* setStudents(mockStudents); */
     }, []);
     return (
         <main className="container mx-auto p-4">

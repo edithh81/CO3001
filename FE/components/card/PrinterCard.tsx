@@ -18,6 +18,7 @@ import { printerDetail } from "@/types";
 import Link from "next/link";
 import { campus } from "@/lib/constants";
 const PrinterCard = ({ id, room, queue, info, campusId }: printerDetail) => {
+    const parsedInfo = JSON.parse(info);
     return (
         <Card className="bg-sky-300 rounded-lg px-4 flex justify-center items-center flex-col">
             <CardHeader>
@@ -40,13 +41,13 @@ const PrinterCard = ({ id, room, queue, info, campusId }: printerDetail) => {
                                         <span className="font-bold">
                                             Mẫu máy in:
                                         </span>{" "}
-                                        {info.model}
+                                        {parsedInfo.model}
                                     </p>
                                     <p>
                                         <span className="font-bold">
                                             Loại máy in:
                                         </span>{" "}
-                                        {info.type
+                                        {parsedInfo.type
                                             .map((type) =>
                                                 type == "bw"
                                                     ? "Đen trắng"
@@ -58,7 +59,7 @@ const PrinterCard = ({ id, room, queue, info, campusId }: printerDetail) => {
                                         <span className="font-bold">
                                             Chức năng:
                                         </span>{" "}
-                                        {info.functional
+                                        {parsedInfo.functional
                                             .map((functional) =>
                                                 functional == "single"
                                                     ? "In 1 mặt"

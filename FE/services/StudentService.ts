@@ -22,7 +22,7 @@ export const getAllStudents = async (): Promise<
 > => {
     try {
         const response = await api.get(`/students/getAll`);
-        return response.data;
+        return response.data.data;
     } catch (error) {
         console.log("Error getting all students:", error);
         return { error: "Internal server error" };

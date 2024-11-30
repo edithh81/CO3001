@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { getPrinter } from "@/services/PrinterService";
+import { getPrintersByCampus } from "@/services/PrinterService";
 import { getTotalOrderPrinting } from "@/services/PrintingOrderService";
 import { getTotalOrderBuyPaper } from "@/services/PaperOrderService";
 import { BuyPaperOrder, printerDetail, PrintingOrder } from "@/types";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, formatDate } from "@/lib/utils";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import {
     Table,
@@ -42,7 +42,7 @@ const page = () => {
     useEffect(() => {
         // getting data for each
         // await get
-        /* getPrinter("cs1").then((res) => {
+        getPrintersByCampus("cs1").then((res) => {
             if ("error" in res) {
                 console.log("error");
             } else {
@@ -50,7 +50,7 @@ const page = () => {
             }
         });
 
-        getPrinter("cs2").then((res) => {
+        getPrintersByCampus("cs2").then((res) => {
             if ("error" in res) {
                 console.log("error");
             } else {
@@ -73,22 +73,22 @@ const page = () => {
                 setTotalPaper(res);
             }
         });
+    }, []);
 
+    useEffect(() => {
         setOverviewData([
             {
                 title: "Tổng số máy in",
-                value: printerCS1.length + printerCS2.length + "",
+                value: (printerCS1.length + printerCS2.length).toString(),
                 subValue: `Lý Thường Kiệt: ${printerCS1.length}, Dĩ An: ${printerCS2.length}`,
             },
             {
                 title: "Số máy in đang hoạt động",
                 value:
-                    printerCS1.filter(
-                        (printer) => printer.status === "available"
-                    ).length +
-                    printerCS2.filter(
-                        (printer) => printer.status === "available"
-                    ).length +
+                    printerCS1.filter((printer) => printer.status === "working")
+                        .length +
+                    printerCS2.filter((printer) => printer.status === "working")
+                        .length +
                     "",
                 subValue: `${
                     printerCS1.filter(
@@ -130,39 +130,12 @@ const page = () => {
             },
             {
                 title: "Tổng thu nhập",
-                value: formatPrice( totalPaper.reduce((acc, cur) => acc + cur.total, 0)),
-            }
-        ]); */
-
-        setOverviewData([
-            {
-                title: "Tổng số máy in",
-                value: "100",
-                subValue: "Lý Thường Kiệt: 60, Dĩ An: 40",
-            },
-            {
-                title: "Số máy in đang hoạt động",
-                value: "90",
-                subValue: "10 đang bảo trì",
-            },
-            {
-                title: "Tổng đơn in",
-                value: "150",
-                subValue: "80 hoàn thành, 65 đang chờ, 5 từ chối",
-            },
-            {
-                title: "Tổng đơn mua giấy",
-                value: "50",
-                subValue: "30 hoàn thành, 18 đang chờ, 2 từ chối",
-            },
-            {
-                title: "Tổng doanh thu",
-                value: formatPrice(1000000),
+                value: formatPrice(
+                    totalPaper.reduce((acc, cur) => acc + cur.total, 0)
+                ),
             },
         ]);
-        try {
-        } catch (error) {}
-    }, []);
+    }, [printerCS1, printerCS2, totalPrinting, totalPaper]);
 
     useEffect(() => {
         function last7Days(
@@ -199,27 +172,8 @@ const page = () => {
             return statistics;
         }
 
-        /* setPrintOrderData(last7Days(totalPrinting));
-        setPaperOrderData(last7Days(totalPaper)); */
-        setPrintOrderData([
-            { date: "20/11", total: 50 },
-            { date: "21/11", total: 70 },
-            { date: "22/11", total: 60 },
-            { date: "23/11", total: 80 },
-            { date: "24/11", total: 90 },
-            { date: "25/11", total: 40 },
-            { date: "26/11", total: 30 },
-        ]);
-
-        setPaperOrderData([
-            { date: "20/11", total: 10 },
-            { date: "21/11", total: 15 },
-            { date: "22/11", total: 8 },
-            { date: "23/11", total: 12 },
-            { date: "24/11", total: 20 },
-            { date: "25/11", total: 5 },
-            { date: "26/11", total: 3 },
-        ]);
+        setPrintOrderData(last7Days(totalPrinting));
+        setPaperOrderData(last7Days(totalPaper));
     }, [totalPrinting, totalPaper]);
     return (
         <div className="flex w-full h-full">
@@ -266,6 +220,7 @@ const page = () => {
                                         stroke="#888888"
                                         tickLine={false}
                                         axisLine={false}
+                                        allowDecimals={false}
                                         tickFormatter={(value) => `${value}`}
                                     />
                                     <Bar
@@ -294,6 +249,7 @@ const page = () => {
                                         stroke="#888888"
                                         tickLine={false}
                                         axisLine={false}
+                                        allowDecimals={false}
                                         tickFormatter={(value) => `${value}`}
                                     />
                                     <Bar
@@ -346,7 +302,7 @@ const page = () => {
                                                     {order.byStudent}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {order.at}
+                                                    {formatDate(order.at)}
                                                 </TableCell>
 
                                                 <TableCell>
