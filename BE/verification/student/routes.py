@@ -85,13 +85,28 @@ async def login_hcmut(data: LoginData):
     result = await login(data.username, data.password)
     if result['success']:
         # insert to db student has not existed
-        query = """
-        INSERT INTO student (student_id, total_a3, total_a4)
-        VALUES (:student_id, 20, 20, :student_name)
-        ON CONFLICT (student_id) DO NOTHING;"""
+        query_spec = """
+        SELECT default_pages_a3, default_pages_a4 
+        FROM specification_admin 
+        ORDER BY id DESC 
+        LIMIT 1;
+        """
+        # get default num of pages
+        spec = await db.fetch_one(query_spec)
+        default_a3 = spec["default_pages_a3"]
+        default_a4 = spec["default_pages_a4"]
         
-        await db.execute(query, {'student_id': result['student_id'], 'student_name': result['student_name']})
-        
+        query_insert = """
+        INSERT INTO student (student_id, total_a3, total_a4, student_name)
+        VALUES (:student_id, :total_a3, :total_a4, :student_name)
+        ON CONFLICT (student_id) DO NOTHING;
+        """
+        await db.execute(query_insert, {
+            "student_id": result['student_id'],
+            "total_a3": default_a3,
+            "total_a4": default_a4,
+            "student_name": result['student_name']
+        })
         return {'success':True,'student_name': result['student_name'], 'student_id': result['student_id'], 'student_image': result['student_image']}
     else:
         raise HTTPException(status_code=401, detail=result["message"])

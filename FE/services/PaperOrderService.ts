@@ -17,7 +17,7 @@ export const getTotalOrderBuyPaper = async (): Promise<
     { error: string } | BuyPaperOrder[]
 > => {
     try {
-        const response = await api.get(`/orders/buy-paper`);
+        const response = await api.get(`/orders/buy-paper/all`);
         return response.data;
     } catch (error) {
         console.log("Error getting history of buy paper:", error);

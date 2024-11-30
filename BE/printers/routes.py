@@ -28,7 +28,7 @@ async def get_printers_by_campus(campus: str):
         FROM printer
         LEFT JOIN printing_ord ON printer.id = printing_ord.printer_id 
         AND printing_ord.status = 'pending'
-        WHERE printer.campus = :campus and printer.status = 'available'
+        WHERE printer.campus = :campus
         GROUP BY printer.id
     """
     results = await db.fetch_all(query, {"campus": campus})
@@ -55,7 +55,7 @@ async def get_printers_by_id(printer_id: int):
         FROM printer
         LEFT JOIN printing_ord ON printer.id = printing_ord.printer_id 
         AND printing_ord.status = 'pending'
-        WHERE printer.id = :printer_id and printer.status = 'available'
+        WHERE printer.id = :printer_id
         GROUP BY printer.id
     """
     result = await db.fetch_one(query, {"printer_id": printer_id})

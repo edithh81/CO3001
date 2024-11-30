@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from db import db
-from typing import Optional
+from typing import Optional, Dict
+from enum import Enum
+import datetime
 
 router = APIRouter()
 """
@@ -33,7 +35,7 @@ admin_note: note from admin (maybe ord reject for some reason)
 async def get_all_printing_orders():
     results = await db.fetch_all("SELECT * FROM printing_ord")
     if not results:
-        raise HTTPException(status_code=404, detail="No printing orders found.")
+        return {'success': False, 'data': []}
     trans_result = [
         {
             'orderId': result['id'],
@@ -41,7 +43,7 @@ async def get_all_printing_orders():
             'fileName': result['file_name'],
             'byStudent': result['student_id'],
             'fileId': result['file_id'],
-            'specification': result['specification'],
+            'specifications': result['specification'],
             'totalPages': result['total_page'],
             'status': result['status'],
             'at': result['start_time'],
@@ -55,7 +57,7 @@ async def get_all_printing_orders():
 async def  get_all_printing_orders_by_campus(campus: str):
     results = await db.fetch_all("SELECT * FROM printing_ord WHERE campus = :campus", {"campus": campus})
     if not results:
-        raise HTTPException(status_code=404, detail="No printing orders found for the specified campus.")
+        return {'success': False, 'data': []}
     trans_result = [
         {
             'orderId': result['id'],
@@ -77,7 +79,7 @@ async def  get_all_printing_orders_by_campus(campus: str):
 async def get_all_printing_orders_by_student(student_id: str):
     results = await db.fetch_all("SELECT * FROM printing_ord WHERE student_id = :student_id", {"student_id": student_id})
     if not results:
-        raise HTTPException(status_code=404, detail="No printing orders found for the specified student.")
+        return {'success': False, 'data': []}
     trans_result = [
         {
             'orderId': result['id'],
@@ -95,58 +97,72 @@ async def get_all_printing_orders_by_student(student_id: str):
     ]
     return {'success': True, 'data': trans_result}
 
-@router.get("/printing/{order_id}")
+@router.get("/printing/byOrderId/{order_id}")
 async def get_orders_by_id(order_id: int):
-    results = await db.fetch_one("SELECT * FROM printing_ord WHERE id = :order_id", {"order_id": order_id})
-    if not results:
-        raise HTTPException(status_code=404, detail="No printing order found for the specified id.")
-    trans_result = [
-        {
+    result = await db.fetch_one("SELECT * FROM printing_ord WHERE id = :order_id", {"order_id": order_id})
+    if not result:
+        return {'success': False, 'data': []}
+    trans_result = {
             'orderId': result['id'],
             'printerId': result['printer_id'],
             'fileName': result['file_name'],
             'byStudent': result['student_id'],
             'fileId': result['file_id'],
-            'specification': result['specification'],
+            'specifications': result['specification'],
             'totalPages': result['total_page'],
             'status': result['status'],
             'at': result['start_time'],
             'campus': result['campus'],
         }
-        for result in results
-    ]
+    
     return {'success': True, 'data': trans_result}
+class PrintingOrderStatus(str, Enum):
+    pending = "pending"
+    completed = "complete"
+    rejected = "rejected"
+class PrintingSpecification(BaseModel):
+    pages: str  
+    size: str  
+    functional: str  
+    type: str  
+    copies: int 
+    additionalInfo: Optional[str] = None  
 
 class PrintingOrderCreate(BaseModel):
     printerId: int
     fileName: str
     byStudent: str
     fileId: str
-    specification: dict
+    specifications: PrintingSpecification  # This is now a nested model
     totalPages: int
-    status: str
+    status: PrintingOrderStatus
     at: str
     campus: str
  
 @router.post("/create")
 async def create_printing_order(data: PrintingOrderCreate):
+    # Insert the printing order into the database
     query = """
         INSERT INTO printing_ord (printer_id, file_name, student_id, file_id, specification, total_page, status, campus, start_time)
         VALUES (:printer_id, :file_name, :student_id, :file_id, :specification, :total_page, :status, :campus, :start_time)
         RETURNING *;
     """
-    results = await db.fetch_one(query, {
+    result = await db.fetch_one(query, {
         "printer_id": data.printerId,
         "file_name": data.fileName,
         "student_id": data.byStudent,
         "file_id": data.fileId,
-        "specification": data.specification,
+        "specification": data.specifications.json(),  
         "total_page": data.totalPages,
         "status": data.status,
         "campus": data.campus,
         "start_time": data.at
     })
-    return {'success': True, 'data': results}
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Failed to create printing order.")
+    
+    return {'success': True, 'data': result['id']}
 
 
 class PrintingOrderUpdate(BaseModel):
@@ -155,16 +171,19 @@ class PrintingOrderUpdate(BaseModel):
     comment: Optional[str] = None 
 @router.put("/update/{order_id: PrintingOrderUpdate.orderId}")
 async def update_printing_order(order_id: int, data: PrintingOrderUpdate):
+    now_time = datetime.now()
+    now_time = now_time.strftime("%Y-%m-%d %H:%M:%S")
     query = """
         UPDATE printing_ord
-        SET status = :status, admin_note = :comment, end_time = CURRENT_TIMESTAMP
+        SET status = :status, admin_note = :comment, end_time = :time
         WHERE id = :order_id
         RETURNING *;
     """
     results = await db.fetch_one(query, {
         "status": data.status,
         "comment": data.comment,
-        "order_id": order_id
+        "order_id": order_id,
+        "time": now_time
     })
     
     return {'success': True, 'data': results}
