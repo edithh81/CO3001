@@ -79,7 +79,7 @@ export type BuyPaperOrder = {
 export type BuyPaperOrderTrue = Omit<BuyPaperOrder, "orderId"> & {
     orderId: number;
 };
-
+export type printerDetailCreate = Omit<printerDetail, "id" | "queue">
 export type Student = {
     studentId: string;
     name: string;

@@ -1,15 +1,15 @@
 import api from "@/api";
 import { PrintingOrder, PrintingOrderTrue } from "@/types";
 
-export const getHistoryPrinting = async (studentId: string) => {
-    try {
-        const response = await api.get(`/history/printing/${studentId}`);
-        return response;
-    } catch (error) {
-        console.log("Error getting history of printing:", error);
-        throw error;
-    }
-};
+// export const getHistoryPrinting = async (studentId: string) => {
+//     try {
+//         const response = await api.get(`/orders/printing/stuid/${studentId}`);
+//         return response;
+//     } catch (error) {
+//         console.log("Error getting history of printing:", error);
+//         throw error;
+//     }
+// };
 
 export async function createOrder(params: PrintingOrder) {
     try {
@@ -27,7 +27,7 @@ export const getTotalOrderPrinting = async (): Promise<
     PrintingOrderTrue[] | { error: string }
 > => {
     try {
-        const response = await api.get(`/orders/printing`);
+        const response = await api.get(`/orders/printing/all`);
         return response.data;
     } catch (error) {
         console.log("Error getting history of printing:", error);
@@ -59,7 +59,7 @@ export const getOrderById = async (
     orderId: number
 ): Promise<PrintingOrder | { error: string }> => {
     try {
-        const response = await api.get(`/orders/${orderId}`);
+        const response = await api.get(`/orders/printing/${orderId}`);
         return response.data;
     } catch (error) {
         return { error: "Internal server error" };
@@ -72,7 +72,7 @@ export const updateOrderStatus = async (
     comment?: string
 ) => {
     try {
-        const response = await api.put(`/orders/${orderId}`, {
+        const response = await api.put(`/orders/update/${orderId}`, {
             status,
             comment,
         });

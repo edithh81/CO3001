@@ -11,7 +11,7 @@ const loginAPI = async (
     type: string
 ): Promise<LoginAPIResponse> => {
     try {
-        const response = await api.post("/login/student", {
+        const response = await api.post("/students/login/student", {
             username: values.username,
             password: values.password,
         });

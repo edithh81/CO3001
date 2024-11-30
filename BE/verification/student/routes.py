@@ -87,11 +87,80 @@ async def login_hcmut(data: LoginData):
         # insert to db student has not existed
         query = """
         INSERT INTO student (student_id, total_a3, total_a4)
-        VALUES (:student_id, 20, 20)
+        VALUES (:student_id, 20, 20, :student_name)
         ON CONFLICT (student_id) DO NOTHING;"""
         
-        await db.execute(query, {'student_id': result['student_id']})
+        await db.execute(query, {'student_id': result['student_id'], 'student_name': result['student_name']})
         
         return {'success':True,'student_name': result['student_name'], 'student_id': result['student_id'], 'student_image': result['student_image']}
     else:
         raise HTTPException(status_code=401, detail=result["message"])
+    
+
+# for admin
+class Student(BaseModel):
+    studentId:str
+    name:str
+    A3:int
+    A4:int
+
+@router.get("/student/{student_id}")
+async def get_student_by_id(student_id: str):
+    query = """
+        SELECT * FROM student WHERE student_id = :student_id
+    """
+    result = await db.fetch_one(query, {"student_id": student_id})
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="No student found for the specified id.")
+    trans_result = {
+        'studentId': result['student_id'],
+        'name': result['student_name'],
+        'A3': result['total_a3'],
+        'A4': result['total_a4']
+    }
+    return {'success': True, 'data': trans_result}
+
+    
+@router.get("/getAll")
+async def get_all_students():
+    query = """
+        SELECT * FROM student
+    """
+    result = await db.fetch_all(query)
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="No student found.")
+    
+    results = [
+        {
+            'studentId': student['student_id'],
+            'name': student['student_name'],
+            'A3': student['total_a3'],
+            'A4': student['total_a4']    
+        }
+        for student in result
+        
+    ]
+    return {'success': True, 'data': results}
+
+class updateStudentBalance(BaseModel):
+    studentId: str
+    amount: int
+    type: str
+    
+@router.put("/updatePaper")
+async def update_student_balance(data: updateStudentBalance):
+    # Determine the column to update based on the type
+    if data.type in ["A3", "A4"]:
+        column = f"total_{data.type.lower()}"
+        query = f"""
+        UPDATE student
+        SET {column} = {column} + :amount
+        WHERE student_id = :student_id
+        """
+        await db.execute(query, {'student_id': data.studentId, 'amount': data.amount})
+        afterupdate = await db.fetch_one("SELECT * FROM student WHERE student_id = :student_id", {"student_id": data.studentId})
+        return {'success': True, 'data': afterupdate}
+    else:
+        raise HTTPException(status_code=400, detail="Invalid type")
