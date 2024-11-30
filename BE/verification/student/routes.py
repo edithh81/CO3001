@@ -86,7 +86,7 @@ async def login_hcmut(data: LoginData):
     if result['success']:
         # insert to db student has not existed
         query = """
-        INSERT INTO student (student_id, total_a3, total_a4)
+        INSERT INTO student (student_id, total_a3, total_a4, student_name)
         VALUES (:student_id, 20, 20, :student_name)
         ON CONFLICT (student_id) DO NOTHING;"""
         
