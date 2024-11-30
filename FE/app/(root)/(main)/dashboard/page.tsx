@@ -1,8 +1,22 @@
 "use client";
-import React from "react";
-import { campus } from "@/lib/constants";
+import React, { useState, useEffect } from "react";
 import CampusCard from "@/components/card/CampusCard";
 import { useAuth } from "@/context/AuthContext";
+const campus = [
+    {
+        name: "Lý Thường Kiệt",
+        id: "cs1",
+        total: 10,
+        available: 5,
+    },
+    {
+        name: "Dĩ An",
+        id: "cs2",
+        total: 10,
+        available: 5,
+    },
+];
+
 const page = () => {
     const { studentInfo } = useAuth();
     console.log("thông tin từ dashboard: ", studentInfo);

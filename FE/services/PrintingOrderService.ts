@@ -1,7 +1,7 @@
 import api from "@/api";
 import { PrintingOrder, PrintingOrderTrue } from "@/types";
 
-const getHistoryPrinting = async (studentId: string) => {
+export const getHistoryPrinting = async (studentId: string) => {
     try {
         const response = await api.get(`/history/printing/${studentId}`);
         return response;
@@ -11,7 +11,16 @@ const getHistoryPrinting = async (studentId: string) => {
     }
 };
 
-export default getHistoryPrinting;
+export async function createOrder(params: PrintingOrder) {
+    try {
+        // THIS WOULD RETURN AN ORDER ID
+        const response = await api.post(`/orders/create`, params);
+        return response;
+    } catch (error) {
+        console.log("Error creating order:", error);
+        throw error;
+    }
+}
 
 // admin
 export const getTotalOrderPrinting = async (): Promise<

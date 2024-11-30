@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, use } from "react";
+import { useParams } from "next/navigation";
 import { printerCampus } from "@/lib/constants";
 import { printerDetail } from "@/types";
 import { set } from "zod";
@@ -22,10 +23,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { getPrinter } from "@/services/GetPrinters";
+import { getPrinter } from "@/services/PrinterService";
 
-const page = ({ params }: { params: Promise<{ campus: string }> }) => {
-    const { campus } = use(params);
+// gonna fix type later, easy fix
+
+const page = () => {
+    const params = useParams();
+    const campus = params.campus as string;
     const [initPrinterList, setInitPrinterList] = useState<printerDetail[]>([]);
     const [printerList, setPrinterList] = useState<printerDetail[]>([]);
     const [totalPages, setTotalPages] = useState(0);
@@ -33,21 +37,18 @@ const page = ({ params }: { params: Promise<{ campus: string }> }) => {
     const [displayPrinters, setDisplayPrinters] = useState<printerDetail[]>([]);
     const printerPerPage = 8;
     useEffect(() => {
-        const res = printerCampus.filter((item) => item.campus === campus);
-        setPrinterList(res[0].printers);
-        setInitPrinterList(res[0].printers);
+        const res = printerCampus.filter((item) => item.campusId === campus);
+        setPrinterList(res);
+        setInitPrinterList(res);
 
-        /* const fetchPrinters = async () => {
-            await getPrinter(campus).then((res) => {
-                if ("error" in res) {
-                    console.log("Error getting printers:", res.error);
-                } else {
-                    setPrinterList(res);
-                    setInitPrinterList(res);
-                }
-            });
-        };
-        fetchPrinters(); */
+        /* getPrinter(campus).then((res) => {
+            if ("error" in res) {
+                console.log("Error getting printers:", res.error);
+            } else {
+                setPrinterList(res);
+                setInitPrinterList(res);
+            }
+        }); */
 
         // setPrinterList
     }, []);
