@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { getPrintersByCampus } from "@/services/PrinterService";
 import { getTotalOrderPrinting } from "@/services/PrintingOrderService";
 import { getTotalOrderBuyPaper } from "@/services/PaperOrderService";
-import { BuyPaperOrder, printerDetail, PrintingOrder } from "@/types";
+import {
+    BuyPaperOrder,
+    BuyPaperOrderTrue,
+    printerDetail,
+    PrintingOrder,
+    PrintingOrderTrue,
+} from "@/types";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import {
@@ -31,8 +37,8 @@ const page = () => {
     const [overviewData, setOverviewData] = useState<overview[]>([]);
     const [printerCS1, setPrinterCS1] = useState<printerDetail[]>([]);
     const [printerCS2, setPrinterCS2] = useState<printerDetail[]>([]);
-    const [totalPrinting, setTotalPrinting] = useState<PrintingOrder[]>([]);
-    const [totalPaper, setTotalPaper] = useState<BuyPaperOrder[]>([]);
+    const [totalPrinting, setTotalPrinting] = useState<PrintingOrderTrue[]>([]);
+    const [totalPaper, setTotalPaper] = useState<BuyPaperOrderTrue[]>([]);
     const [printOrderData, setPrintOrderData] = useState<statistic[]>([]);
     const [paperOrderData, setPaperOrderData] = useState<statistic[]>([]);
 
@@ -205,7 +211,7 @@ const page = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Print Orders (Last 7 Days)</CardTitle>
+                            <CardTitle>Các đơn in (7 ngày qua)</CardTitle>
                         </CardHeader>
                         <CardContent className="pt-2">
                             <ResponsiveContainer width="100%" height={300}>
@@ -234,7 +240,7 @@ const page = () => {
                     </Card>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Paper Orders (Last 7 Days)</CardTitle>
+                            <CardTitle>Các đơn mua giấy (7 ngày qua)</CardTitle>
                         </CardHeader>
                         <CardContent className="pt-2">
                             <ResponsiveContainer width="100%" height={300}>
@@ -265,7 +271,7 @@ const page = () => {
                 <div className="grid gap-6 mt-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Recent Print Orders</CardTitle>
+                            <CardTitle>Các đơn in gần đây</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Table>
@@ -281,6 +287,11 @@ const page = () => {
                                 </TableHeader>
                                 <TableBody>
                                     {totalPrinting
+                                        .sort((a, b) => {
+                                            return a.orderId > b.orderId
+                                                ? -1
+                                                : 1;
+                                        })
                                         .slice(0, 4)
                                         .map((order, index) => (
                                             <TableRow
@@ -309,7 +320,12 @@ const page = () => {
                                                     {order.totalPages}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {order.status}
+                                                    {order.status === "pending"
+                                                        ? "Đang chờ"
+                                                        : order.status ===
+                                                          "completed"
+                                                        ? "Hoàn thành"
+                                                        : "Bị từ chối"}
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -319,7 +335,7 @@ const page = () => {
                     </Card>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Recent Paper Orders</CardTitle>
+                            <CardTitle>Các đơn mua giấy gần đây</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Table>
@@ -334,6 +350,11 @@ const page = () => {
                                 </TableHeader>
                                 <TableBody>
                                     {totalPaper
+                                        .sort((a, b) => {
+                                            return a.orderId > b.orderId
+                                                ? -1
+                                                : 1;
+                                        })
                                         .slice(0, 4)
                                         .map((order, index) => (
                                             <TableRow key={index}>
@@ -344,14 +365,19 @@ const page = () => {
                                                     {order.byStudent}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {order.at}
+                                                    {formatDate(order.at)}
                                                 </TableCell>
 
                                                 <TableCell>
                                                     {order.total}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {order.status}
+                                                    {order.status === "pending"
+                                                        ? "Đang chờ"
+                                                        : order.status ===
+                                                          "completed"
+                                                        ? "Hoàn thành"
+                                                        : "Bị từ chối"}
                                                 </TableCell>
                                             </TableRow>
                                         ))}

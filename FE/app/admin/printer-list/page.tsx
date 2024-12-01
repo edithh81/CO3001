@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { useState, useMemo, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,14 +20,21 @@ import AdminPrinterCard from "@/components/card/AdminPrinterCard";
 import AddPrinterDialog from "@/components/dialog/AddPrinterDialog";
 import PrinterDetailsDialog from "@/components/dialog/PrinterDetailDialog";
 import { useToast } from "@/hooks/use-toast";
-import { printerDetail, CampusId, PrinterStatus } from "@/types";
+import {
+    printerDetail,
+    CampusId,
+    PrinterStatus,
+    printerDetailCreate,
+} from "@/types";
 import {
     getAllPrinters,
     updatePrinter,
     deletePrinter,
+    addPrinter,
 } from "@/services/PrinterService";
+
 interface PrintersPageState {
-    currentPage: number;
+    currentPage: Record<CampusId, number>;
     itemsPerPage: number;
     sortDirection: SortDirection;
     filterStatus: PrinterStatus | "all";
@@ -34,142 +42,20 @@ interface PrintersPageState {
 
 export type SortDirection = "asc" | "desc";
 
-const mockPrinters: printerDetail[] = [
-    {
-        id: 1,
-        campusId: "cs1",
-        room: "A101",
-        queue: 3,
-        status: "working",
-        info: {
-            model: "HP LaserJet Pro M404dn",
-            type: ["bw"],
-            functional: ["single", "double"],
-        },
-    },
-    {
-        id: 2,
-        campusId: "cs1",
-        room: "B205",
-        queue: 0,
-        status: "working",
-        info: {
-            model: "Canon PIXMA TR8520",
-            type: ["color"],
-            functional: ["single", "double", "scan"],
-        },
-    },
-    {
-        id: 3,
-        campusId: "cs1",
-        room: "C303",
-        queue: 5,
-        status: "maintenance",
-        info: {
-            model: "Epson WorkForce Pro WF-3720",
-            type: ["bw", "color"],
-            functional: ["single", "double", "scan"],
-        },
-    },
-    {
-        id: 4,
-        campusId: "cs1",
-        room: "D102",
-        queue: 2,
-        status: "working",
-        info: {
-            model: "Brother HL-L2350DW",
-            type: ["bw"],
-            functional: ["single", "double"],
-        },
-    },
-    {
-        id: 5,
-        campusId: "cs1",
-        room: "E201",
-        queue: 1,
-        status: "working",
-        info: {
-            model: "Lexmark CX517de",
-            type: ["bw", "color"],
-            functional: ["single", "double", "scan"],
-        },
-    },
-    {
-        id: 6,
-        campusId: "cs2",
-        room: "F101",
-        queue: 4,
-        status: "working",
-        info: {
-            model: "HP OfficeJet Pro 9015",
-            type: ["bw", "color"],
-            functional: ["single", "double", "scan"],
-        },
-    },
-    {
-        id: 7,
-        campusId: "cs2",
-        room: "G205",
-        queue: 0,
-        status: "maintenance",
-        info: {
-            model: "Canon imageCLASS MF743Cdw",
-            type: ["bw", "color"],
-            functional: ["single", "double", "scan"],
-        },
-    },
-    {
-        id: 8,
-        campusId: "cs2",
-        room: "H303",
-        queue: 2,
-        status: "working",
-        info: {
-            model: "Epson EcoTank ET-4760",
-            type: ["bw", "color"],
-            functional: ["single", "double", "scan"],
-        },
-    },
-    {
-        id: 9,
-        campusId: "cs2",
-        room: "I102",
-        queue: 1,
-        status: "working",
-        info: {
-            model: "Brother MFC-L8900CDW",
-            type: ["bw", "color"],
-            functional: ["single", "double", "scan"],
-        },
-    },
-    {
-        id: 10,
-        campusId: "cs2",
-        room: "J201",
-        queue: 3,
-        status: "working",
-        info: {
-            model: "Lexmark MC3224dwe",
-            type: ["bw", "color"],
-            functional: ["single", "double", "scan"],
-        },
-    },
-];
+const ITEMS_PER_PAGE = 9;
 
-const ITEMS_PER_PAGE = 10;
-
-export default function page() {
+export default function Page() {
     const [printers, setPrinters] = useState<printerDetail[]>([]);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [selectedPrinter, setSelectedPrinter] =
         useState<printerDetail | null>(null);
     const [pageState, setPageState] = useState<PrintersPageState>({
-        currentPage: 1,
+        currentPage: { cs1: 1, cs2: 1 },
         itemsPerPage: ITEMS_PER_PAGE,
-        sortDirection: "asc" as SortDirection,
+        sortDirection: "asc",
         filterStatus: "all",
     });
+    const [activeCampus, setActiveCampus] = useState<CampusId>("cs1");
     const { toast } = useToast();
 
     useEffect(() => {
@@ -183,7 +69,6 @@ export default function page() {
                 setPrinters(res);
             }
         });
-        //setPrinters(mockPrinters);
     }, []);
 
     const filteredAndSortedPrinters = useMemo(() => {
@@ -203,8 +88,12 @@ export default function page() {
     }, [printers, pageState.filterStatus, pageState.sortDirection]);
 
     const paginatedPrinters = useMemo(() => {
-        const startIndex = (pageState.currentPage - 1) * pageState.itemsPerPage;
-        return filteredAndSortedPrinters.slice(
+        const campusPrinters = filteredAndSortedPrinters.filter(
+            (printer) => printer.campusId === activeCampus
+        );
+        const startIndex =
+            (pageState.currentPage[activeCampus] - 1) * pageState.itemsPerPage;
+        return campusPrinters.slice(
             startIndex,
             startIndex + pageState.itemsPerPage
         );
@@ -212,36 +101,44 @@ export default function page() {
         filteredAndSortedPrinters,
         pageState.currentPage,
         pageState.itemsPerPage,
+        activeCampus,
     ]);
 
     const totalPages = Math.ceil(
-        filteredAndSortedPrinters.length / pageState.itemsPerPage
+        filteredAndSortedPrinters.filter(
+            (printer) => printer.campusId === activeCampus
+        ).length / pageState.itemsPerPage
     );
 
-    const handleAddPrinter = (newPrinter: printerDetail) => {
-        /* addPrinter(newPrinter).then((res) => {
-                if ("error" in res) {
-                    toast({
-                        title: "Error",
-                        description: res.error,
-                        variant: "destructive",})
-                } else {
-                    setPrinters([...printers, newPrinter]);
-                    toast({
-                        title: "Success",
-                        description: "Printer added successfully",
-                        className: "bg-green-500",});
-                }
-            }); */
-        setPrinters([...printers, newPrinter]);
-    };
-
-    const handleUpdatePrinter = (updatedPrinter: printerDetail) => {
-        /* updatePrinter(updatedPrinter).then((res) => {
+    const handleAddPrinter = (newPrinter: printerDetailCreate) => {
+        addPrinter(newPrinter).then((res) => {
             if ("error" in res) {
                 toast({
                     title: "Error",
-                    description: res.error,
+                    description: "Error adding printer",
+                    variant: "destructive",
+                });
+            } else {
+                const newPrinterToAdd: printerDetail = {
+                    ...newPrinter,
+                    id: res.printerId,
+                };
+                setPrinters([...printers, newPrinterToAdd]);
+                toast({
+                    title: "Success",
+                    description: "Printer added successfully",
+                    className: "bg-green-500",
+                });
+            }
+        });
+    };
+
+    const handleUpdatePrinter = (updatedPrinter: printerDetail) => {
+        updatePrinter(updatedPrinter).then((res) => {
+            if ("error" in res) {
+                toast({
+                    title: "Error",
+                    description: "Error updating printer",
                     variant: "destructive",
                 });
             } else {
@@ -257,22 +154,15 @@ export default function page() {
                     className: "bg-green-500",
                 });
             }
-        }); */
-
-        setPrinters(
-            printers.map((p) =>
-                p.id === updatedPrinter.id ? updatedPrinter : p
-            )
-        );
-        setSelectedPrinter(updatedPrinter);
+        });
     };
 
     const handleDeletePrinter = (id: number) => {
-        /* deletePrinter(id).then((res) => {    
+        deletePrinter(id).then((res) => {
             if ("error" in res) {
                 toast({
                     title: "Error",
-                    description: res.error,
+                    description: "Error deleting printer",
                     variant: "destructive",
                 });
             } else {
@@ -284,13 +174,14 @@ export default function page() {
                     className: "bg-green-500",
                 });
             }
-        }); */
-        setPrinters(printers.filter((p) => p.id !== id));
-        setSelectedPrinter(null);
+        });
     };
 
     const handlePageChange = (page: number) => {
-        setPageState((prev) => ({ ...prev, currentPage: page }));
+        setPageState((prev) => ({
+            ...prev,
+            currentPage: { ...prev.currentPage, [activeCampus]: page },
+        }));
     };
 
     const handleSortChange = () => {
@@ -304,7 +195,7 @@ export default function page() {
         setPageState((prev) => ({
             ...prev,
             filterStatus: status,
-            currentPage: 1,
+            currentPage: { cs1: 1, cs2: 1 },
         }));
     };
 
@@ -312,8 +203,10 @@ export default function page() {
         <div className="container mx-auto p-4">
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">Quản lý máy in</h1>
-                <Button onClick={() => setIsAddDialogOpen(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Thêm máy in mới
+                <Button
+                    onClick={() => setIsAddDialogOpen(true)}
+                    className="bg-main hover:bg-[#030391]">
+                    <PlusCircle className="mr-2 h-4 w-4 " /> Thêm máy in mới
                 </Button>
             </div>
 
@@ -342,30 +235,24 @@ export default function page() {
                 </Button>
             </div>
 
-            <Tabs defaultValue="cs1">
+            <Tabs
+                defaultValue="cs1"
+                onValueChange={(value) => setActiveCampus(value as CampusId)}>
                 <TabsList>
                     <TabsTrigger value="cs1">Cơ sở Lý Thường Kiệt</TabsTrigger>
                     <TabsTrigger value="cs2">Cơ sở Dĩ An</TabsTrigger>
                 </TabsList>
-                {["cs1", "cs2"].map((campus) => (
-                    <TabsContent key={campus} value={campus}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {paginatedPrinters
-                                .filter(
-                                    (printer) => printer.campusId === campus
-                                )
-                                .map((printer) => (
-                                    <AdminPrinterCard
-                                        key={printer.id}
-                                        printer={printer}
-                                        onSelect={() =>
-                                            setSelectedPrinter(printer)
-                                        }
-                                    />
-                                ))}
-                        </div>
-                    </TabsContent>
-                ))}
+                <TabsContent value={activeCampus}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {paginatedPrinters.map((printer) => (
+                            <AdminPrinterCard
+                                key={printer.id}
+                                printer={printer}
+                                onSelect={() => setSelectedPrinter(printer)}
+                            />
+                        ))}
+                    </div>
+                </TabsContent>
             </Tabs>
 
             {/* Pagination */}
@@ -373,19 +260,29 @@ export default function page() {
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handlePageChange(pageState.currentPage - 1)}
-                    disabled={pageState.currentPage === 1}>
+                    onClick={() =>
+                        handlePageChange(
+                            pageState.currentPage[activeCampus] - 1
+                        )
+                    }
+                    disabled={pageState.currentPage[activeCampus] === 1}>
                     <ChevronLeft className="h-4 w-4 mr-2" />
                     Previous
                 </Button>
                 <span>
-                    Page {pageState.currentPage} of {totalPages}
+                    Page {pageState.currentPage[activeCampus]} of {totalPages}
                 </span>
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handlePageChange(pageState.currentPage + 1)}
-                    disabled={pageState.currentPage === totalPages}>
+                    onClick={() =>
+                        handlePageChange(
+                            pageState.currentPage[activeCampus] + 1
+                        )
+                    }
+                    disabled={
+                        pageState.currentPage[activeCampus] === totalPages
+                    }>
                     Next
                     <ChevronRight className="h-4 w-4 ml-2" />
                 </Button>

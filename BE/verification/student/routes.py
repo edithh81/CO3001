@@ -16,7 +16,7 @@ async def login(user:str, password: str):
     with requests.Session() as S:
         S.cookies.clear()
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36 Edg/126.0.0.0'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0'
         }
 
         # Login to MyBK
@@ -85,13 +85,28 @@ async def login_hcmut(data: LoginData):
     result = await login(data.username, data.password)
     if result['success']:
         # insert to db student has not existed
-        query = """
+        query_spec = """
+        SELECT default_pages_a3, default_pages_a4 
+        FROM specification_admin 
+        ORDER BY id DESC 
+        LIMIT 1;
+        """
+        # get default num of pages
+        spec = await db.fetch_one(query_spec)
+        default_a3 = spec["default_pages_a3"]
+        default_a4 = spec["default_pages_a4"]
+        # insert to db student has not existed
+        query_insert = """
         INSERT INTO student (student_id, total_a3, total_a4, student_name)
-        VALUES (:student_id, 20, 20, :student_name)
-        ON CONFLICT (student_id) DO NOTHING;"""
-        
-        await db.execute(query, {'student_id': result['student_id'], 'student_name': result['student_name']})
-        
+        VALUES (:student_id, :total_a3, :total_a4, :student_name)
+        ON CONFLICT (student_id) DO NOTHING;
+        """
+        await db.execute(query_insert, {
+            "student_id": result['student_id'],
+            "total_a3": default_a3,
+            "total_a4": default_a4,
+            "student_name": result['student_name']
+        })
         return {'success':True,'student_name': result['student_name'], 'student_id': result['student_id'], 'student_image': result['student_image']}
     else:
         raise HTTPException(status_code=401, detail=result["message"])
@@ -164,3 +179,24 @@ async def update_student_balance(data: updateStudentBalance):
         return {'success': True, 'data': afterupdate}
     else:
         raise HTTPException(status_code=400, detail="Invalid type")
+
+
+@router.get("/notification/{student_id}")
+async def get_notification(student_id: str):
+    query = """
+        SELECT * FROM notification WHERE student_id = :student_id ORDER BY id DESC LIMIT 10
+    """
+    result = await db.fetch_all(query, {"student_id": student_id})
+    
+    if not result:
+        return {'success': False, 'data': []}
+    
+    results = [
+        {
+            'id': notification['id'],
+            'content': notification['content'],
+            'at': notification['time_stamp']
+        }
+        for notification in result
+    ]
+    return {'success': True, 'data': results}

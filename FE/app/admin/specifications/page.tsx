@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,11 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { printingSpecsSchema, PrintingSpecsFormValues } from "@/lib/validation";
+import {
+    updatePrintingSpecifications,
+    getPrintingSpecifications,
+} from "@/services/AdminService";
+import { PrintingSpecs } from "@/types";
 
 const fileTypes = [
     { id: "pdf", label: "PDF" },
@@ -43,6 +48,18 @@ const fileTypes = [
 ];
 
 export default function PrintingSpecsPage() {
+    const [initSpec, setInitSpec] = useState<PrintingSpecs | null>(null);
+
+    function onSubmit(data: PrintingSpecsFormValues) {
+        console.log(data);
+        const { resetStartDate, resetEndDate, ...rest } = data;
+        updatePrintingSpecifications({
+            ...rest,
+            resetStartDate: resetStartDate.toISOString(),
+            resetEndDate: resetEndDate.toISOString(),
+        });
+    }
+
     const form = useForm<PrintingSpecsFormValues>({
         resolver: zodResolver(printingSpecsSchema),
         defaultValues: {
@@ -55,15 +72,38 @@ export default function PrintingSpecsPage() {
         },
     });
 
-    function onSubmit(data: PrintingSpecsFormValues) {
-        console.log(data);
-        // TODO: Implement form submission logic
-    }
+    useEffect(() => {
+        getPrintingSpecifications().then((res) => {
+            if ("error" in res) {
+                console.log(
+                    "Error getting printing specifications:",
+                    res.error
+                );
+            } else {
+                console.log(res.data);
+                setInitSpec(res.data);
+
+                form.reset({
+                    defaultPagesA4: res.data.defaultPagesA4 ?? 100,
+                    defaultPagesA3: res.data.defaultPagesA3 ?? 50,
+                    resetStartDate:
+                        new Date(res.data.resetStartDate) ?? new Date(),
+                    resetEndDate: new Date(res.data.resetEndDate) ?? new Date(),
+                    resetPeriod: res.data.resetPeriod ?? "monthly",
+                    permittedFileTypes: res.data.permittedFileTypes ?? [
+                        "pdf",
+                        "doc",
+                        "docx",
+                    ],
+                });
+            }
+        });
+    }, [form]);
 
     return (
         <div className="container mx-auto py-10">
             <h1 className="text-3xl font-bold mb-6">
-                Printing Service Specifications
+                Chỉnh sửa thông số in ấn
             </h1>
             <Form {...form}>
                 <form
@@ -75,7 +115,7 @@ export default function PrintingSpecsPage() {
                             name="defaultPagesA4"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Default A4 Pages</FormLabel>
+                                    <FormLabel>Số trang A4 mặc định</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
@@ -88,8 +128,9 @@ export default function PrintingSpecsPage() {
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        The default number of A4 pages allocated
-                                        to students.
+                                        Số lượng trang A4 mặc định được cấp cho
+                                        sinh viên mỗi lần reset và lần đầu đăng
+                                        nhập
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -100,7 +141,7 @@ export default function PrintingSpecsPage() {
                             name="defaultPagesA3"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Default A3 Pages</FormLabel>
+                                    <FormLabel>Số trang A3 mặc định</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
@@ -113,8 +154,9 @@ export default function PrintingSpecsPage() {
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        The default number of A3 pages allocated
-                                        to students.
+                                        Số lượng trang A3 mặc định được cấp cho
+                                        sinh viên mỗi lần reset và lần đầu đăng
+                                        nhập
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -128,7 +170,7 @@ export default function PrintingSpecsPage() {
                             name="resetStartDate"
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
-                                    <FormLabel>Reset Start Date</FormLabel>
+                                    <FormLabel>Ngày bắt đầu</FormLabel>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <FormControl>
@@ -145,7 +187,7 @@ export default function PrintingSpecsPage() {
                                                             "PPP"
                                                         )
                                                     ) : (
-                                                        <span>Pick a date</span>
+                                                        <span>Chọn 1 ngày</span>
                                                     )}
                                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                 </Button>
@@ -168,8 +210,8 @@ export default function PrintingSpecsPage() {
                                         </PopoverContent>
                                     </Popover>
                                     <FormDescription>
-                                        The start date for resetting page
-                                        balances.
+                                        Ngày bắt đầu việc cấp mới lượng giấy cho
+                                        sinh viên sau một khoảng thời gian.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -180,7 +222,7 @@ export default function PrintingSpecsPage() {
                             name="resetEndDate"
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
-                                    <FormLabel>Reset End Date</FormLabel>
+                                    <FormLabel>Ngày kết thúc</FormLabel>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <FormControl>
@@ -197,7 +239,7 @@ export default function PrintingSpecsPage() {
                                                             "PPP"
                                                         )
                                                     ) : (
-                                                        <span>Pick a date</span>
+                                                        <span>Chọn 1 ngày</span>
                                                     )}
                                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                 </Button>
@@ -220,8 +262,8 @@ export default function PrintingSpecsPage() {
                                         </PopoverContent>
                                     </Popover>
                                     <FormDescription>
-                                        The end date for resetting page
-                                        balances.
+                                        Ngày kết thúc việc cấp mới lượng giấy
+                                        cho sinh viên sau một khoảng thời gian.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -234,7 +276,7 @@ export default function PrintingSpecsPage() {
                         name="resetPeriod"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Reset Period</FormLabel>
+                                <FormLabel>Tần suất cấp mới</FormLabel>
                                 <Select
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}>
@@ -245,24 +287,24 @@ export default function PrintingSpecsPage() {
                                     </FormControl>
                                     <SelectContent>
                                         <SelectItem value="daily">
-                                            Daily
+                                            Hàng ngày
                                         </SelectItem>
                                         <SelectItem value="weekly">
-                                            Weekly
+                                            Hàng tuần
                                         </SelectItem>
                                         <SelectItem value="monthly">
-                                            Monthly
+                                            Hàng tháng
                                         </SelectItem>
                                         <SelectItem value="quarterly">
-                                            Quarterly
+                                            Hàng quý
                                         </SelectItem>
                                         <SelectItem value="yearly">
-                                            Yearly
+                                            Hàng năm
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormDescription>
-                                    How often the page balances should be reset.
+                                    Tần suất cấp mới lượng giấy cho sinh viên.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -276,11 +318,11 @@ export default function PrintingSpecsPage() {
                             <FormItem>
                                 <div className="mb-4">
                                     <FormLabel className="text-base">
-                                        Permitted File Types
+                                        Các file được phép yêu cầu in
                                     </FormLabel>
                                     <FormDescription>
-                                        Select the file types that can be
-                                        uploaded to the printing service.
+                                        Chọn các loại file mà sinh viên được
+                                        phép tải lên
                                     </FormDescription>
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -338,7 +380,7 @@ export default function PrintingSpecsPage() {
                     <Button
                         type="submit"
                         className="w-full bg-main hover:bg-[#030391]/90">
-                        Save Specifications
+                        Lưu cài đặt
                     </Button>
                 </form>
             </Form>

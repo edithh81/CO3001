@@ -58,10 +58,6 @@ const page = () => {
                         width={200}
                         height={200}
                     />
-
-                    <Link href={"/dashboard"}>
-                        <Button className="w-[200px]">Dashboard</Button>
-                    </Link>
                 </div>
                 <div className="flex justify-center items-center">
                     <AutoCarousel />

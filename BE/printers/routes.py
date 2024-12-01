@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from db import db
-
-
+from typing import Optional, Dict, List
+from enum import Enum
+import json
 router = APIRouter()
 """
 printer 
@@ -101,12 +102,20 @@ async def get_all_printers():
     # Returning the response with the 'queue' attribute
     return {'success': True, 'data': trans_result}
 
-
+class PrinterStatus(str, Enum):
+    working = "working"
+    maintenance = "maintenance"
+    
+class PrinterInfo(BaseModel):
+    model: str
+    type: list[str]
+    functional: list[str]
+    
 class PrinterAddNew(BaseModel):
     room: str
-    campus: str
-    info: dict 
-    status: str
+    campusId: str
+    info: PrinterInfo
+    status: PrinterStatus = PrinterStatus.working
 
 
 @router.post("/addnew")
@@ -114,31 +123,50 @@ async def add_new_printer(printer: PrinterAddNew):
     query = """
         INSERT INTO printer (room, campus, info, status)
         VALUES (:room, :campus, :info, :status)
-        RETURNING id, room, campus, info
+        RETURNING *;
     """
-    result = await db.fetch_one(query, {"room": printer.room, "campus": printer.campus, "info": printer.info, "status": printer.status})
-    
-    return {'success': True, 'data': result}
+    info_json = json.dumps(printer.info.dict())  # Serialize info to JSON
+    result = await db.fetch_one(query, {
+        "room": printer.room,
+        "campus": printer.campusId,
+        "info": info_json,  
+        "status": printer.status.value 
+    })
+    return {'success': True, 'data': result['id']}
 
 
 class PrinterUpdate(BaseModel):
     id: int
     room: str
-    campus: str
-    info: dict
-    status: str
+    campusId: str
+    queue: Optional[int] = None
+    info: PrinterInfo
+    status: PrinterStatus
     
-@router.put("/update/{printer_id: int}")
+@router.put("/update/{printer_id:int}")
 async def update_printer(printer_id:int, printer: PrinterUpdate):
     query = """
         UPDATE printer
         SET room = :room, campus = :campus, info = :info, status = :status
         WHERE id = :id
-        RETURNING id, room, campus, info
+        RETURNING *;
     """
-    result = await db.fetch_one(query, {"id": printer_id, "room": printer.room, "campus": printer.campus, "info": printer.info, "status": printer.status})
-    
-    return {'success': True, 'data': result}
+    info_json = json.dumps(printer.info.dict())
+    result = await db.fetch_one(query, {
+        "id": printer_id, 
+        "room": printer.room, 
+        "campus": printer.campusId, 
+        "info": info_json, 
+        "status": printer.status.value
+    })
+    after_update = {
+        'id': result['id'],
+        'room': result['room'],
+        'campusId': result['campus'],
+        'info': result['info'],
+        'status': result['status']
+    }
+    return {'success': True, 'data': after_update}
 
 @router.delete("/delete/{printer_id:int}")
 async def delete_printer(printer_id: int):
@@ -148,7 +176,7 @@ async def delete_printer(printer_id: int):
     printer_exists = await db.fetch_one(check_query, {"printer_id": printer_id})
     
     if not printer_exists:
-        raise HTTPException(status_code=404, detail="Printer not found.")
+        return {'success': False, 'message': "Printer not exists in system yet."}
     query ="""
         DELETE FROM printer
         WHERE id = :printer_id

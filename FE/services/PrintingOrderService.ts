@@ -1,3 +1,4 @@
+// @ts-nocheck
 import api from "@/api";
 import { PrintingOrder, PrintingOrderTrue } from "@/types";
 
@@ -43,13 +44,18 @@ export const getOrderPrintingByCampus = async (campusId: string) => {
     }
 };
 
-export const getOrderPrintingByStudentId = async (studentId: string) => {
+export const getOrderPrintingByStudentId = async (
+    studentId: string
+): Promise<{ data: PrintingOrderTrue[] } | { error: string }> => {
     try {
         const response = await api.get(`/orders/printing/student/${studentId}`);
-        return response;
+        response.data.data.forEach((order) => {
+            order.specifications = JSON.parse(order.specifications);
+        });
+        return { data: response.data.data };
     } catch (error) {
         console.log("Error getting history of printing:", error);
-        throw error;
+        return { error: "Internal server error" };
     }
 };
 
@@ -69,15 +75,15 @@ export const updateOrderStatus = async (
     orderId: number,
     status: string,
     comment?: string
-) => {
+): Promise<{ status: string } | { error: string }> => {
     try {
         const response = await api.put(`/orders/update/${orderId}`, {
             status,
             comment,
         });
-        return response;
+        return { status: response.data.success };
     } catch (error) {
         console.log("Error updating order status:", error);
-        throw error;
+        return { error: "Internal server error" };
     }
 };

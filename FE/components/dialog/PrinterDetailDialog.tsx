@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState } from "react";
 import {
     Dialog,
@@ -44,51 +45,74 @@ export default function PrinterDetailsDialog({
             <Dialog open={!!printer} onOpenChange={onClose}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Printer Details</DialogTitle>
+                        <DialogTitle>Thông tin máy in</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <p>
                             <strong>ID:</strong> {printer.id}
                         </p>
                         <p>
-                            <strong>Campus:</strong>{" "}
+                            <strong>Cơ sở:</strong>{" "}
                             {printer.campusId === "cs1"
-                                ? "Campus 1"
-                                : "Campus 2"}
+                                ? "Lý Thường Kiệt"
+                                : "Dĩ An"}
                         </p>
                         <p>
-                            <strong>Room:</strong> {printer.room}
+                            <strong>Phòng:</strong> {printer.room}
                         </p>
                         <p>
-                            <strong>Queue:</strong> {printer.queue}
+                            <strong>Số đơn đang chờ:</strong> {printer.queue}
                         </p>
                         <p>
-                            <strong>Status:</strong> {printer.status}
+                            <strong>Trạng thái:</strong>{" "}
+                            {printer.status === "working"
+                                ? "Đang hoạt động"
+                                : "Đang bảo trì"}
                         </p>
                         <p>
-                            <strong>Model:</strong> {printer.info.model}
+                            <strong>Mãu máy in:</strong> {printer.info.model}
                         </p>
                         <p>
-                            <strong>Type:</strong>{" "}
-                            {printer.info.type.join(", ")}
+                            <strong>Loại:</strong>{" "}
+                            {printer.info.type
+                                .map((type) =>
+                                    type === "bw" ? "Trắng đen" : "Màu"
+                                )
+                                .join(", ")}
                         </p>
                         <p>
-                            <strong>Functions:</strong>{" "}
-                            {printer.info.functional.join(", ")}
+                            <strong>Tính năng:</strong>{" "}
+                            {printer.info.functional
+                                .map((functional) =>
+                                    functional === "single"
+                                        ? "Một mặt"
+                                        : functional === "double"
+                                        ? "Hai mặt"
+                                        : "Scan"
+                                )
+                                .join(", ")}
                         </p>
                         <div className="flex space-x-4">
-                            <Button onClick={handleStatusChange}>
+                            <Button
+                                onClick={handleStatusChange}
+                                className={`${
+                                    printer.status === "working"
+                                        ? "bg-yellow-500 hover:bg-yellow-500/90"
+                                        : "bg-green-500 hover:bg-green-500/90"
+                                }`}>
                                 {printer.status === "working"
-                                    ? "Deactivate"
-                                    : "Activate"}
+                                    ? "Tạm dừng"
+                                    : "Kích hoạt"}
                             </Button>
-                            <Button onClick={() => setIsEditDialogOpen(true)}>
-                                Edit Printer
+                            <Button
+                                onClick={() => setIsEditDialogOpen(true)}
+                                className="bg-main hover:bg-[#030391]">
+                                Chỉnh sửa
                             </Button>
                             <Button
                                 variant="destructive"
                                 onClick={handleDelete}>
-                                Delete Printer
+                                Xoá máy in
                             </Button>
                         </div>
                     </div>

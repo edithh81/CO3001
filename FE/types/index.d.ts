@@ -1,3 +1,5 @@
+import { PrintingSpecsFormValues } from "@/lib/validation";
+
 export type Credentials = {
     username: string;
     password: string;
@@ -22,7 +24,7 @@ export type PrinterFunctional = "single" | "double" | "scan";
 export type PrinterStatus = "working" | "maintenance";
 export type CampusId = "cs1" | "cs2";
 
-export interface printerDetail {
+export type printerDetail = {
     id: number;
     campusId?: CampusId;
     room: string;
@@ -33,7 +35,9 @@ export interface printerDetail {
         type: PrinterType[];
         functional: PrinterFunctional[];
     };
-}
+};
+
+export type printerDetailCreate = Omit<printerDetail, "id">;
 
 export type PrintingOrder = {
     orderId?: number;
@@ -85,4 +89,18 @@ export type Student = {
     name: string;
     A3: number;
     A4: number;
+};
+
+export type PrintingSpecs = Omit<
+    PrintingSpecsFormValues,
+    "resetStartDate" | "resetEndDate"
+> & {
+    resetStartDate: string;
+    resetEndDate: string;
+};
+
+export type Notification = {
+    id: number;
+    content: string;
+    at: string;
 };

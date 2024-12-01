@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -78,7 +79,7 @@ export default function EditPrinterDialog({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Edit Printer</DialogTitle>
+                    <DialogTitle>Chỉnh sửa máy in</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form
@@ -89,7 +90,7 @@ export default function EditPrinterDialog({
                             name="campusId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Campus</FormLabel>
+                                    <FormLabel>Cơ sở</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         defaultValue={field.value}>
@@ -100,10 +101,10 @@ export default function EditPrinterDialog({
                                         </FormControl>
                                         <SelectContent>
                                             <SelectItem value="cs1">
-                                                Campus 1
+                                                Lý Thường Kiệt
                                             </SelectItem>
                                             <SelectItem value="cs2">
-                                                Campus 2
+                                                Dĩ An
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -116,7 +117,7 @@ export default function EditPrinterDialog({
                             name="room"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Room</FormLabel>
+                                    <FormLabel>Phòng</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder="Enter room number"
@@ -132,7 +133,7 @@ export default function EditPrinterDialog({
                             name="model"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Model</FormLabel>
+                                    <FormLabel>Mẫu máy in</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder="Enter printer model"
@@ -148,7 +149,7 @@ export default function EditPrinterDialog({
                             name="type"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel>Type</FormLabel>
+                                    <FormLabel>Loại</FormLabel>
                                     <div className="flex space-x-4">
                                         {["bw", "color"].map((type) => (
                                             <FormField
@@ -190,8 +191,8 @@ export default function EditPrinterDialog({
                                                         </FormControl>
                                                         <FormLabel className="font-normal">
                                                             {type === "bw"
-                                                                ? "Black & White"
-                                                                : "Color"}
+                                                                ? "Trắng đen"
+                                                                : "Màu"}
                                                         </FormLabel>
                                                     </FormItem>
                                                 )}
@@ -207,7 +208,7 @@ export default function EditPrinterDialog({
                             name="functional"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel>Functions</FormLabel>
+                                    <FormLabel>Tính năng</FormLabel>
                                     <div className="flex space-x-4">
                                         {["single", "double", "scan"].map(
                                             (func) => (
@@ -251,10 +252,10 @@ export default function EditPrinterDialog({
                                                             <FormLabel className="font-normal">
                                                                 {func ===
                                                                 "single"
-                                                                    ? "Single-sided"
+                                                                    ? "Một mặt"
                                                                     : func ===
                                                                       "double"
-                                                                    ? "Double-sided"
+                                                                    ? "Hai mặt"
                                                                     : "Scan"}
                                                             </FormLabel>
                                                         </FormItem>
@@ -267,7 +268,11 @@ export default function EditPrinterDialog({
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit">Update Printer</Button>
+                        <Button
+                            type="submit"
+                            className="bg-main hover:bg-[#030391]">
+                            Hoàn tất
+                        </Button>
                     </form>
                 </Form>
             </DialogContent>

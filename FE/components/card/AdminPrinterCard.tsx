@@ -23,13 +23,13 @@ export default function AdminPrinterCard({
         <Card className="bg-white border border-black ">
             <CardHeader>
                 <CardTitle className="font-bold text-xl">
-                    Printer {printer.id}
+                    Máy in số {printer.id}
                 </CardTitle>
             </CardHeader>
             <CardContent>
                 <CardDescription className="text-black">
-                    <p>Room: {printer.room}</p>
-                    <p>Queue: {printer.queue}</p>
+                    <p>Phòng: {printer.room}</p>
+                    <p>Số đơn in đang đợi: {printer.queue}</p>
                     <Badge
                         className={`${
                             printer.status === "working"
@@ -41,13 +41,15 @@ export default function AdminPrinterCard({
                                 ? "default"
                                 : "destructive"
                         }>
-                        {printer.status}
+                        {printer.status === "working" ? "Hoạt động" : "Bảo trì"}
                     </Badge>
                 </CardDescription>
             </CardContent>
             <CardFooter>
-                <Button onClick={onSelect} className="bg-main">
-                    View Details
+                <Button
+                    onClick={onSelect}
+                    className="bg-main hover:bg-[#030391]">
+                    Xem chi tiết
                 </Button>
             </CardFooter>
         </Card>

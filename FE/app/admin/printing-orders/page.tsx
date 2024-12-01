@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -178,7 +179,7 @@ const page = () => {
                                                 <TableCell>
                                                     {order.byStudent}
                                                 </TableCell>
-                                                <TableCell className="line-clamp-1 w-[250px]">
+                                                <TableCell className="line-clamp-1 w-[250px] whitespace-nowrap">
                                                     {order.fileName}
                                                 </TableCell>
                                                 <TableCell>

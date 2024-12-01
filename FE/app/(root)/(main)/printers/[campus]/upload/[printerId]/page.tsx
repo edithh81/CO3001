@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { use, useState, useEffect } from "react";
 import { useParams } from "next/navigation";
@@ -25,32 +26,31 @@ import { Button } from "@/components/ui/button";
 import { UploadData, PrintingOrder, printerDetail } from "@/types";
 import { calculatePageCount } from "@/hooks/use-pdfjs";
 import { uploadSchema } from "@/lib/validation";
-import { getPrinterSpec } from "@/services/PrinterService";
 import { useAuth } from "@/context/AuthContext";
 import { usePDFJS } from "@/hooks/use-pdfjs";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { uploadFileToCDN } from "@/services/FileAction";
 import { createOrder } from "@/services/PrintingOrderService";
+import { getStudentInfo } from "@/services/StudentService";
+import { getPrintingSpecifications } from "@/services/AdminService";
+import { getPrinterSpec } from "@/services/PrinterService";
 
-const pageLeft = {
-    A4: 30,
-    A3: 15,
-};
-
-const allowFileTypes = [".pdf", ".doc", ".docx"];
+//const allowFileTypes = [".pdf", ".doc", ".docx"];
 
 type PrinterSpec = Pick<printerDetail["info"], "type" | "functional">;
 
 export default function page() {
     const params = useParams();
-    const printerId = params.printerId;
+    const printerId = params.printerId as string;
     const campus = params.campus;
     const { studentInfo } = useAuth();
     const [pageCount, setPageCount] = useState<number | null>(null);
     const [expectedPages, setExpectedPages] = useState<number | null>(null);
     const [fileError, setFileError] = useState<string | null>(null);
     const [fileName, setFileName] = useState<string | null>(null);
+    const [allowFileTypes, setAllowFileTypes] = useState<string[]>([]);
+    const [pageLeft, setPageLeft] = useState<{ A3: number; A4: number }>();
     const [fileId, setFileId] = useState<string>("");
     const [selectedSize, setSelectedSize] = useState<"A4" | "A3">("A4");
     const [printerSpecs, setPrinterSpecs] = useState<PrinterSpec | null>(null);
@@ -68,13 +68,41 @@ export default function page() {
     useEffect(() => {
         // fetch printer details
         // setPrinterSpecs(printerSpecs);
-        /* getPrinterSpec(printerId).then((res) => {
-            setPrinterSpecs(res.info);
-        }); */
-        setPrinterSpecs({
+        getPrinterSpec(printerId).then((res) => {
+            if ("error" in res) {
+                console.log("Error getting printer spec");
+                return;
+            } else {
+                const { info } = res;
+                const newInfo = JSON.parse(info);
+                setPrinterSpecs(newInfo);
+                console.log("Printer spec", newInfo);
+            }
+        });
+        getStudentInfo(studentInfo.studentId).then((res) => {
+            if ("error" in res) {
+                console.log("Error getting student info");
+                return;
+            } else {
+                const { A3, A4 } = res.data;
+                setPageLeft({ A3, A4 });
+                console.log("Student info", A3, A4);
+            }
+        });
+        getPrintingSpecifications().then((res) => {
+            if ("error" in res) {
+                console.log("Error getting printing spec");
+                return;
+            } else {
+                const { permittedFileTypes } = res.data;
+                setAllowFileTypes(permittedFileTypes);
+                //console.log("Printing spec", permittedFileTypes);
+            }
+        });
+        /* setPrinterSpecs({
             type: ["bw"],
             functional: ["single", "double", "scan"],
-        });
+        }); */
     }, []);
 
     const {
@@ -237,7 +265,7 @@ export default function page() {
                             variant: "destructive",
                         });
                     } else {
-                        router.push(`/success/${res.orderId}`);
+                        router.push(`/success/printing/${res.orderId}`);
                     }
                 });
                 // const orderId = await createOrder(order)
@@ -332,20 +360,41 @@ export default function page() {
                                     render={({ field }) => (
                                         <Select
                                             onValueChange={field.onChange}
-                                            defaultValue={field.value}>
+                                            defaultValue={
+                                                printerSpecs?.functional[0]
+                                            }>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select functional" />
+                                                <SelectValue
+                                                    placeholder={
+                                                        printerSpecs
+                                                            ?.functional[0] ===
+                                                        "single"
+                                                            ? "Một mặt"
+                                                            : printerSpecs
+                                                                  ?.functional[0] ===
+                                                              "double"
+                                                            ? "Hai mặt"
+                                                            : "Scan"
+                                                    }
+                                                />
                                             </SelectTrigger>
+
                                             <SelectContent>
-                                                <SelectItem value="single">
-                                                    Một mặt
-                                                </SelectItem>
-                                                <SelectItem value="double">
-                                                    Hai mặt
-                                                </SelectItem>
-                                                <SelectItem value="scan">
-                                                    Scan
-                                                </SelectItem>
+                                                {printerSpecs?.functional.map(
+                                                    (functional) => (
+                                                        <SelectItem
+                                                            key={functional}
+                                                            value={functional}>
+                                                            {functional ===
+                                                            "single"
+                                                                ? "Một mặt"
+                                                                : functional ===
+                                                                  "double"
+                                                                ? "Hai mặt"
+                                                                : "Scan"}
+                                                        </SelectItem>
+                                                    )
+                                                )}
                                             </SelectContent>
                                         </Select>
                                     )}
@@ -359,17 +408,31 @@ export default function page() {
                                     render={({ field }) => (
                                         <Select
                                             onValueChange={field.onChange}
-                                            defaultValue={field.value}>
+                                            defaultValue={
+                                                printerSpecs?.type[0]
+                                            }>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select type" />
+                                                <SelectValue
+                                                    placeholder={
+                                                        printerSpecs
+                                                            ?.type[0] === "bw"
+                                                            ? "Trắng đen"
+                                                            : "Màu"
+                                                    }
+                                                />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="bw">
-                                                    Trắng đen
-                                                </SelectItem>
-                                                <SelectItem value="color">
-                                                    Màu
-                                                </SelectItem>
+                                                {printerSpecs?.type.map(
+                                                    (type) => (
+                                                        <SelectItem
+                                                            key={type}
+                                                            value={type}>
+                                                            {type === "bw"
+                                                                ? "Trắng đen"
+                                                                : "Màu"}
+                                                        </SelectItem>
+                                                    )
+                                                )}
                                             </SelectContent>
                                         </Select>
                                     )}

@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from db import db
 from typing import Optional, Dict
 from enum import Enum
-
+import datetime
 router = APIRouter()
 """
 printing_ord
@@ -117,7 +117,7 @@ async def get_orders_by_id(order_id: int):
     return {'success': True, 'data': trans_result}
 class PrintingOrderStatus(str, Enum):
     pending = "pending"
-    completed = "complete"
+    completed = "completed"
     rejected = "rejected"
 class PrintingSpecification(BaseModel):
     pages: str  
@@ -164,22 +164,26 @@ async def create_printing_order(data: PrintingOrderCreate):
     return {'success': True, 'data': result['id']}
 
 
-class PrintingOrderUpdate(BaseModel):
-    orderId: int
-    status: str
-    comment: Optional[str] = None 
-@router.put("/update/{order_id: PrintingOrderUpdate.orderId}")
-async def update_printing_order(order_id: int, data: PrintingOrderUpdate):
+class UpdateOrderStatusRequest(BaseModel):
+    status: PrintingOrderStatus
+    comment: Optional[str] = None
+@router.put("/update/{order_id}")
+async def update_printing_order(order_id:int, update_data: UpdateOrderStatusRequest):
+    current = datetime.datetime.now()
+    formatted_time = current.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
     query = """
         UPDATE printing_ord
-        SET status = :status, admin_note = :comment, end_time = CURRENT_TIMESTAMP
+        SET status = :status, admin_note = :comment, end_time = :formatted_time
         WHERE id = :order_id
         RETURNING *;
     """
     results = await db.fetch_one(query, {
-        "status": data.status,
-        "comment": data.comment,
-        "order_id": order_id
+        "status": update_data.status,
+        "comment": update_data.comment,
+        "order_id": order_id,
+        "formatted_time": formatted_time
     })
-    
-    return {'success': True, 'data': results}
+    if results:
+        return {'success': True, 'data': results}
+    else:
+        return {'success': False, 'data': []}

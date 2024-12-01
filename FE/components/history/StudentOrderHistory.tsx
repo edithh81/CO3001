@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 
 import { useState } from "react";
@@ -94,10 +95,10 @@ export default function StudentOrderHistory({ orders, type }: OrderTableProps) {
                         <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All orders</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
+                        <SelectItem value="all">Tất cả</SelectItem>
+                        <SelectItem value="pending">Đang chờ</SelectItem>
+                        <SelectItem value="completed">Đã hoàn thành</SelectItem>
+                        <SelectItem value="rejected">Bị từ chối</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -105,17 +106,17 @@ export default function StudentOrderHistory({ orders, type }: OrderTableProps) {
                 <TableHeader>
                     <TableRow>
                         <TableHead>
-                            Order ID <SortButton column="orderId" />
+                            Mã đơn <SortButton column="orderId" />
                         </TableHead>
                         <TableHead>
-                            Student <SortButton column="byStudent" />
+                            MSSV <SortButton column="byStudent" />
                         </TableHead>
                         {type === "printing" && (
                             <>
-                                <TableHead>File Name</TableHead>
-                                <TableHead>Specifications</TableHead>
+                                <TableHead>Tên file</TableHead>
+                                <TableHead>Thông số in ấn</TableHead>
                                 <TableHead>
-                                    Total Pages{" "}
+                                    Tổng số trang{" "}
                                     <SortButton column="totalPages" />
                                 </TableHead>
                             </>
@@ -129,16 +130,16 @@ export default function StudentOrderHistory({ orders, type }: OrderTableProps) {
                                     A4 <SortButton column="A4" />
                                 </TableHead>
                                 <TableHead>
-                                    Total <SortButton column="total" />
+                                    Tổng cộng <SortButton column="total" />
                                 </TableHead>
-                                <TableHead>Method</TableHead>
+                                <TableHead>Phương thức</TableHead>
                             </>
                         )}
                         <TableHead>
-                            Status <SortButton column="status" />
+                            Trạng thái <SortButton column="status" />
                         </TableHead>
                         <TableHead>
-                            Time <SortButton column="at" />
+                            Vào lúc <SortButton column="at" />
                         </TableHead>
                     </TableRow>
                 </TableHeader>
@@ -149,7 +150,7 @@ export default function StudentOrderHistory({ orders, type }: OrderTableProps) {
                             <TableCell>{order.byStudent}</TableCell>
                             {type === "printing" && (
                                 <>
-                                    <TableCell className="line-clamp-1 w-[250px]">
+                                    <TableCell className="line-clamp-1 w-[250px] whitespace-nowrap">
                                         {(order as PrintingOrderTrue).fileName}
                                     </TableCell>
                                     <TableCell>
@@ -187,16 +188,19 @@ export default function StudentOrderHistory({ orders, type }: OrderTableProps) {
                                         {(order as BuyPaperOrderTrue).total}
                                     </TableCell>
                                     <TableCell>
-                                        {(order as BuyPaperOrderTrue).method}
+                                        {(order as BuyPaperOrderTrue).method ===
+                                        "cash"
+                                            ? "Tiền mặt"
+                                            : "BKPay"}
                                     </TableCell>
                                 </>
                             )}
                             <TableCell>
                                 {order.status === "pending"
-                                    ? "Pending"
+                                    ? "Đang chờ"
                                     : order.status === "completed"
-                                    ? "Completed"
-                                    : "Rejected"}
+                                    ? "Đã hoàn thành"
+                                    : "Bị từ chối"}
                             </TableCell>
                             <TableCell>
                                 {new Date(order.at).toLocaleString()}

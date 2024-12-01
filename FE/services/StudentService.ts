@@ -4,13 +4,14 @@ import axios from "axios";
 
 export const getStudentInfo = async (
     studentId: string
-): Promise<Student | { error: string }> => {
+): Promise<{ data: Student } | { error: string }> => {
     try {
-        const response = await axios.get(`/students/student/${studentId}`);
+        console.log("studentId", studentId);
+        const response = await api.get(`/students/student/${studentId}`);
         if (!response) {
             return { error: "Student not found" };
         }
-        return { error: "Not implement" };
+        return { data: response.data.data };
     } catch (error) {
         console.log("Error getting student info:", error);
         return { error: "Internal server error" };

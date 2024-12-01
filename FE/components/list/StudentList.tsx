@@ -52,7 +52,7 @@ export default function StudentList({ students }: StudentListProps) {
         <div>
             <Input
                 type="text"
-                placeholder="Search by name or ID"
+                placeholder="Tìm kiếm sinh viên bằng tên hoặc MSSV"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="mb-4"
@@ -60,10 +60,10 @@ export default function StudentList({ students }: StudentListProps) {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Student ID</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>A3 Balance</TableHead>
-                        <TableHead>A4 Balance</TableHead>
+                        <TableHead>MSSV</TableHead>
+                        <TableHead>Tên sinh viên</TableHead>
+                        <TableHead>Số giấy A3</TableHead>
+                        <TableHead>Số giấy A4</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>

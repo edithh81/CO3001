@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
@@ -6,31 +7,14 @@ import {
     getOrderById,
     updateOrderStatus,
 } from "@/services/PrintingOrderService";
-import PrintingOrderViewCard from "@/components/card/PrintingOrderViewCard";
-
-const mockData: PrintingOrder = {
-    printerId: 2,
-    fileName: "ÔN-TẬP-TRẮC-NGHIỆM_key_180_trắc_nghiệm.docx",
-    byStudent: "2213046",
-    specifications: {
-        pages: "all",
-        size: "A4",
-        functional: "single",
-        type: "bw",
-        copies: 1,
-        additionalInfo: "hehe",
-    },
-    totalPages: 1,
-    fileId: "ÔN-TẬP-TRẮC-NGHIỆM_key_180_trắc_nghiệm.docx",
-    status: "pending",
-    at: "2024-11-29T14:43:25.928Z",
-    campus: "cs1",
-};
-
+import PrintingOrderViewCard from "@/components/card/AdminPrintingOrderViewCard";
+import { updateStudentBalance } from "@/services/StudentService";
+import { useRouter } from "next/navigation";
+import AdminPrintingOrderViewCard from "@/components/card/AdminPrintingOrderViewCard";
 const page = () => {
     const params = useParams();
     const orderId = params.orderId;
-    console.log(orderId);
+    const router = useRouter();
     const [orderDetail, setOrderDetail] = useState<PrintingOrder>();
     useEffect(() => {
         getOrderById(Number(orderId)).then((res) => {
@@ -40,16 +24,35 @@ const page = () => {
             }
             setOrderDetail(res);
         });
-        /* setOrderDetail(mockData); */
     }, []);
 
-    const handleComplete = (comment: string) => {
-        // updateOrderStatus(Number(orderId), "completed", comment);
+    const handleComplete = async (comment: string) => {
+        await updateOrderStatus(Number(orderId), "completed", comment).then(
+            (res) => {
+                if ("error" in res) {
+                    console.log("Error updating order status");
+                    return;
+                } else {
+                    if (res.status === "success") {
+                        console.log("Order completed", comment);
+                    } else {
+                        console.log("Error updating order status");
+                        return;
+                    }
+                }
+            }
+        );
+        await updateStudentBalance(
+            orderDetail?.byStudent,
+            orderDetail?.totalPages ? -orderDetail.totalPages : 0,
+            orderDetail?.specifications.size
+        );
         console.log("Order completed", comment);
+        router.push("/admin/printing-orders");
     };
 
-    const handleReject = (comment: string) => {
-        // updateOrderStatus(Number(orderId), "rejected", comment);
+    const handleReject = async (comment: string) => {
+        await updateOrderStatus(Number(orderId), "rejected", comment);
         console.log("Order rejected", comment);
     };
 
@@ -59,7 +62,7 @@ const page = () => {
 
     return (
         <div className="w-full min-h-screen flex items-center justify-center p-4">
-            <PrintingOrderViewCard
+            <AdminPrintingOrderViewCard
                 orderId={Number(orderId)}
                 {...orderDetail}
                 onComplete={handleComplete}

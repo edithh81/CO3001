@@ -18,69 +18,33 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { ArrowUpDown, Check, Cross, X } from "lucide-react";
+import { ArrowUpDown, Check, X } from "lucide-react";
 import { BuyPaperOrderTrue } from "@/types";
-import { getTotalOrderBuyPaper } from "@/services/PaperOrderService";
-import { set } from "zod";
+import {
+    getTotalOrderBuyPaper,
+    updatePaperOrderStatus,
+} from "@/services/PaperOrderService";
+import { updateStudentBalance } from "@/services/StudentService";
 
 type SortKey = keyof Pick<
     BuyPaperOrderTrue,
     "orderId" | "byStudent" | "total" | "status" | "at"
 >;
 
-const sampleOrders: BuyPaperOrderTrue[] = [
-    {
-        orderId: 1,
-        byStudent: "John Doe",
-        A4: 50,
-        total: 50,
-        status: "pending",
-        at: "2023-06-01T10:00:00Z",
-        method: "cash",
-    },
-    {
-        orderId: 2,
-        byStudent: "Jane Smith",
-        A3: 10,
-        A4: 20,
-        total: 30,
-        status: "completed",
-        at: "2023-06-02T14:30:00Z",
-        method: "credit card",
-    },
-    {
-        orderId: 3,
-        byStudent: "Bob Johnson",
-        A4: 100,
-        total: 100,
-        status: "rejected",
-        at: "2023-06-03T09:15:00Z",
-        method: "bank transfer",
-    },
-    // Add more sample orders as needed
-];
-
 export default function Page() {
     const [orders, setOrders] = useState<BuyPaperOrderTrue[]>([]);
     const [sortKey, setSortKey] = useState<SortKey>("at");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [statusFilter, setStatusFilter] = useState<string>("all");
-    const [statusEdit, setStatusEdit] = useState<string>("all");
 
     useEffect(() => {
-        /* getTotalOrderBuyPaper().then((res) => {
+        getTotalOrderBuyPaper().then((res) => {
             if ("error" in res) {
                 console.error("Error getting history of buy paper:", res.error);
             } else {
-                setOrders(
-                    res.map((order, index) => ({
-                        ...order,
-                        orderId: index + 1,
-                    }))
-                );
+                setOrders(res);
             }
-        }); */
-        setOrders(sampleOrders);
+        });
     }, []);
 
     const handleApprove = (
@@ -89,10 +53,11 @@ export default function Page() {
         A3: number,
         A4: number
     ) => {
-        // updatePaperOrderStatus(orderId, "completed");
-        // updateStudentBalance(studentId, A3, "A3");
-        // updateStudentBalance(studentId, A4, "A4");
-        console.log("Approve order", orderId, studentId, A3, A4);
+        console.log(A3, A4);
+        updatePaperOrderStatus(orderId, "completed");
+        updateStudentBalance(studentId, A3, "A3");
+        updateStudentBalance(studentId, A4, "A4");
+        //console.log("Approve order", orderId, studentId, A3, A4);
         setOrders(
             orders.map((order) =>
                 order.orderId === orderId
@@ -103,7 +68,7 @@ export default function Page() {
     };
 
     const handleReject = (orderId: number) => {
-        // updatePaperOrderStatus(orderId, "rejected");
+        updatePaperOrderStatus(orderId, "rejected");
         console.log("Reject order", orderId);
         setOrders(
             orders.map((order) =>
@@ -231,49 +196,62 @@ export default function Page() {
                                 <TableCell>
                                     {new Date(order.at).toLocaleString()}
                                 </TableCell>
-                                <TableCell>{order.method}</TableCell>
+                                <TableCell>
+                                    {order.method === "cash"
+                                        ? "Tiền mặt"
+                                        : "BKPay"}
+                                </TableCell>
                                 <TableCell className="flex justify-start items-center space-x-2">
-                                    <Button
-                                        size="icon"
-                                        className="bg-green-500 text-white hover:bg-green-500/90"
-                                        onClick={() =>
-                                            handleApprove(
-                                                order.orderId,
-                                                order.byStudent,
-                                                order.A3 ? order.A3 : 0,
-                                                order.A4 ? order.A4 : 0
-                                            )
-                                        }>
-                                        <Check />
-                                    </Button>
-                                    <Button
-                                        size="icon"
-                                        className="bg-red-500 text-white hover:bg-red-500/90"
-                                        onClick={() =>
-                                            handleReject(order.orderId)
-                                        }>
-                                        <X />
-                                    </Button>
+                                    {order.status === "pending" ? (
+                                        <>
+                                            <Button
+                                                size="icon"
+                                                className="bg-green-500 text-white hover:bg-green-500/90"
+                                                onClick={() =>
+                                                    handleApprove(
+                                                        order.orderId,
+                                                        order.byStudent,
+                                                        order.A3 ? order.A3 : 0,
+                                                        order.A4 ? order.A4 : 0
+                                                    )
+                                                }>
+                                                <Check />
+                                            </Button>
+                                            <Button
+                                                size="icon"
+                                                className="bg-red-500 text-white hover:bg-red-500/90"
+                                                onClick={() =>
+                                                    handleReject(order.orderId)
+                                                }>
+                                                <X />
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        "-"
+                                    )}
                                 </TableCell>
                                 <TableCell>
                                     <Select
-                                        value={statusEdit}
-                                        onValueChange={(e) => {
-                                            handleStatusEdit(order.orderId, e);
-                                            setStatusEdit(e);
-                                        }}>
+                                        value={order.status}
+                                        onValueChange={(newStatus) =>
+                                            handleStatusEdit(
+                                                order.orderId,
+                                                newStatus
+                                            )
+                                        }>
                                         <SelectTrigger className="w-[180px]">
-                                            <SelectValue placeholder="Filter by status" />
+                                            <SelectValue
+                                                placeholder={
+                                                    order.status == "pending"
+                                                        ? "Đang chờ"
+                                                        : order.status ==
+                                                          "completed"
+                                                        ? "Đã hoàn thành"
+                                                        : "Đã huỷ"
+                                                }
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">
-                                                {order.status === "pending"
-                                                    ? "Đang chờ"
-                                                    : order.status ===
-                                                      "completed"
-                                                    ? "Đã hoàn thành"
-                                                    : "Đã huỷ"}
-                                            </SelectItem>
                                             <SelectItem value="pending">
                                                 Đang chờ
                                             </SelectItem>

@@ -25,7 +25,9 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-
+import { Notification } from "@/types";
+import { getNotificationByStudentId } from "@/services/NotificationService";
+import { formatDate } from "@/lib/utils";
 const navLinks = [
     {
         name: "Trang chủ",
@@ -36,7 +38,11 @@ const navLinks = [
         url: "/history/printing",
     },
     {
-        name: "Thanh toán",
+        name: "Lịch sử mua giấy",
+        url: "/history/buy-paper",
+    },
+    {
+        name: "Mua thêm giấy",
         url: "/buy-paper",
     },
 ];
@@ -51,6 +57,7 @@ const Header = () => {
     console.log("thông tin: ", studentId, name);
 
     const [isLargeScreen, setIsLargeScreen] = useState(false);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
     const router = useRouter();
     useEffect(() => {
         const checkScreenSize = () => {
@@ -61,6 +68,17 @@ const Header = () => {
         return () => window.removeEventListener("resize", checkScreenSize);
     }, []);
 
+    useEffect(() => {
+        getNotificationByStudentId(studentId).then((res) => {
+            if ("error" in res) {
+                console.log("Error getting notifications");
+                return;
+            } else {
+                console.log("Notifications: ", res.data);
+                setNotifications(res.data);
+            }
+        });
+    }, []);
     const handleLogout = async () => {
         await logout().then((res) => router.push("/"));
     };
@@ -111,8 +129,21 @@ const Header = () => {
                             <DropdownMenuContent>
                                 <DropdownMenuLabel>Thông báo</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
+                                {notifications.map((notification) => (
+                                    <DropdownMenuItem
+                                        key={notification.id}
+                                        className="flex justify-between w-[500px] space-x-4">
+                                        <p className="w-[400px]">
+                                            {notification.content}
+                                        </p>
+                                        <p className="text-gray-400 text-sm whitespace-nowrap">
+                                            {formatDate(notification.at)}
+                                        </p>
+                                    </DropdownMenuItem>
+                                ))}
+                                {/* 
                                 <DropdownMenuItem>Thông báo 1</DropdownMenuItem>
-                                <DropdownMenuItem>Thông báo 2</DropdownMenuItem>
+                                <DropdownMenuItem>Thông báo 2</DropdownMenuItem> */}
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <DropdownMenu>

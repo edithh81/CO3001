@@ -1,3 +1,4 @@
+// @ts-nocheck
 import api from "@/api";
 import { printerDetail, printerDetailCreate } from "@/types";
 
@@ -6,7 +7,7 @@ export const getPrinterSpec = async (
 ): Promise<printerDetail | { error: string }> => {
     try {
         const response = await api.get(`/printers/id/${printerId}`);
-        return response.data;
+        return response.data.data;
     } catch (error) {
         console.log("Error getting printer specs:", error);
         throw error;
@@ -30,6 +31,9 @@ export const getPrintersByCampus = async (
 ): Promise<printerDetail[] | { error: string }> => {
     try {
         const response = await api.get(`/printers/campus/${campus}`);
+        response.data.data.forEach((printer) => {
+            printer.info = JSON.parse(printer.info);
+        });
         return response.data.data;
     } catch (error) {
         console.log("Error getting all printers:", error);
@@ -37,18 +41,21 @@ export const getPrintersByCampus = async (
     }
 };
 
-export const addPrinter = async (printer: printerDetailCreate) => {
+export const addPrinter = async (
+    printer: printerDetailCreate
+): Promise<{ printerId: number } | { error: string }> => {
     try {
         const response = await api.post(`/printers/addnew`, printer);
-        return response;
+        return { printerId: Number(response.data.data) };
     } catch (error) {
         console.log("Error adding printer:", error);
-        throw error;
+        return { error: "Internal server error" };
     }
 };
 
 export const updatePrinter = async (printer: printerDetail) => {
     try {
+        console.log("data sent", printer);
         const response = await api.put(
             `/printers/update/${printer.id}`,
             printer

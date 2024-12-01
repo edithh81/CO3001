@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { FileIcon, Download, CheckCircle, XCircle } from "lucide-react";
-import axios from "axios";
 import { PrintingOrder } from "@/types";
 import { useState } from "react";
 
@@ -20,7 +19,7 @@ interface PrintingOrderProps extends PrintingOrder {
     onReject: (comment: string) => void;
 }
 
-export default function PrintingOrderViewCard({
+export default function AdminPrintingOrderViewCard({
     orderId,
     printerId,
     fileName,
@@ -40,48 +39,11 @@ export default function PrintingOrderViewCard({
         setComment(e.target.value);
     };
 
-    const handleDownload = async (fileId: string) => {
-        try {
-            // Call the API endpoint with axios
-            const response = await axios.get(`/api/download`, {
-                params: { fileId }, // Send `fileId` as a query parameter
-                responseType: "blob", // Handle binary data
-            });
-
-            // Create a Blob URL for the downloaded file
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-
-            // Extract filename from Content-Disposition header
-            const contentDisposition = response.headers["content-disposition"];
-            const fileNameMatch = contentDisposition?.match(
-                /filename\*?=['"]?([^;'"]+)/
-            );
-            const fileName = fileNameMatch
-                ? decodeURIComponent(fileNameMatch[1])
-                : fileId; // Fallback to `fileId`
-
-            // Trigger the download
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = fileName.replace(/"/g, ""); // Sanitize the filename
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-
-            // Revoke the Blob URL
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error("Error downloading file:", error);
-        }
-    };
-
     return (
         <Card className="w-full max-w-7xl">
             <CardHeader>
                 <CardTitle className="flex justify-between items-center">
-                    <span className="text-2xl">
-                        Order ID: {orderId || "N/A"}
-                    </span>
+                    <span className="text-2xl">Đơn số: {orderId || "N/A"}</span>
                     <Badge variant="outline" className="text-2xl">
                         {specifications.size}
                     </Badge>

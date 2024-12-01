@@ -1,210 +1,234 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { printLog } from "@/types";
-const page = () => {
+import { Input } from "@/components/ui/input";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+} from "@/components/ui/pagination";
+import { PrintingOrderTrue } from "@/types";
+import { getOrderPrintingByStudentId } from "@/services/PrintingOrderService";
+import { useAuth } from "@/context/AuthContext";
+import { getStudentInfo } from "@/services/StudentService";
+export default function PrintHistory() {
+    const { studentInfo } = useAuth();
+    const studentId = studentInfo.studentId;
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
-    const [printHistory, setPrintHistory] = useState<printLog[]>([]);
+    const [printHistory, setPrintHistory] = useState<PrintingOrderTrue[]>([]);
+    const [filteredHistory, setFilteredHistory] = useState<PrintingOrderTrue[]>(
+        []
+    );
     const [totalA4, setTotalA4] = useState(0);
     const [totalA3, setTotalA3] = useState(0);
+    const [totalA4Left, setTotalA4Left] = useState(0);
+    const [totalA3Left, setTotalA3Left] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
-    const totalPages = Math.ceil(printHistory.length / rowsPerPage);
 
     useEffect(() => {
-        // mock data for print history
-        const mockData = [
-            {
-                time: "17/06/2024 10:30 - 11:00",
-                printer: "001",
-                fileName: "document1.pdf",
-                size: "A4",
-                pages: 5,
-            },
-            {
-                time: "07/09/2024 12:30 - 13:00",
-                printer: "002",
-                fileName: "report.pdf",
-                size: "A3",
-                pages: 2,
-            },
-            {
-                time: "15/09/2024 10:30 - 11:00",
-                printer: "003",
-                fileName: "document2.pdf",
-                size: "A4",
-                pages: 10,
-            },
-            {
-                time: "17/09/2024 12:30 - 13:00",
-                printer: "004",
-                fileName: "report.pdf",
-                size: "A3",
-                pages: 5,
-            },
-            {
-                time: "07/10/2024 12:30 - 13:00",
-                printer: "005",
-                fileName: "document3.pdf",
-                size: "A4",
-                pages: 15,
-            },
-            {
-                time: "15/10/2024 10:30 - 11:00",
-                printer: "006",
-                fileName: "document4.pdf",
-                size: "A4",
-                pages: 10,
-            },
-            {
-                time: "17/10/2024 12:30 - 13:00",
-                printer: "007",
-                fileName: "report.pdf",
-                size: "A3",
-                pages: 5,
-            },
-            {
-                time: "07/11/2024 12:30 - 13:00",
-                printer: "008",
-                fileName: "document5.pdf",
-                size: "A4",
-                pages: 15,
-            },
-            {
-                time: "15/11/2024 10:30 - 11:00",
-                printer: "009",
-                fileName: "document6.pdf",
-                size: "A4",
-                pages: 10,
-            },
-            {
-                time: "17/11/2024 12:30 - 13:00",
-                printer: "010",
-                fileName: "report.pdf",
-                size: "A3",
-                pages: 5,
-            },
-        ];
-        setPrintHistory(mockData);
+        getOrderPrintingByStudentId(studentId).then((data) => {
+            if ("error" in data) {
+                console.error(data.error);
+                return;
+            }
+            setPrintHistory(data.data);
+            setFilteredHistory(data.data);
+        });
+        getStudentInfo(studentId).then((data) => {
+            if ("error" in data) {
+                console.error(data.error);
+                return;
+            }
+            setTotalA4Left(data.data.A4);
+            setTotalA3Left(data.data.A3);
+        });
     }, []);
 
     const handleSearch = () => {
-        // TODO: Call API to get print history here
-        const tempA4 = printHistory.filter((item) => item.size === "A4");
-        const tempA3 = printHistory.filter((item) => item.size === "A3");
-        let a4 = 0;
-        let a3 = 0;
-        for (let i = 0; i < tempA4.length; i++) {
-            a4 += tempA4[i].pages;
-        }
-        for (let i = 0; i < tempA3.length; i++) {
-            a3 += tempA3[i].pages;
-        }
-        setTotalA4(a4);
-        setTotalA3(a3);
-        console.log(startDate, endDate);
+        const filtered = printHistory.filter((item) => {
+            const orderDate = new Date(item.at);
+            return (
+                (!startDate || orderDate >= new Date(startDate)) &&
+                (!endDate || orderDate <= new Date(endDate))
+            );
+        });
+        setFilteredHistory(filtered);
+        setCurrentPage(1);
+        calculateTotals(filtered);
     };
 
-    const handlePageChange = (pageNumber: number) => {
-        setCurrentPage(pageNumber);
+    const handleReset = () => {
+        setStartDate("");
+        setEndDate("");
+        setFilteredHistory(printHistory);
+        setCurrentPage(1);
+        calculateTotals(printHistory);
     };
 
-    const currentData = printHistory.slice(
+    const calculateTotals = (data: PrintingOrderTrue[]) => {
+        const a4Pages = data
+            .filter((item) => item.specifications.size === "A4")
+            .reduce((sum, item) => sum + item.totalPages, 0);
+        const a3Pages = data
+            .filter((item) => item.specifications.size === "A3")
+            .reduce((sum, item) => sum + item.totalPages, 0);
+        console.log("a4Pages", a4Pages);
+        setTotalA4(a4Pages);
+        setTotalA3(a3Pages);
+    };
+
+    useEffect(() => {
+        calculateTotals(printHistory);
+    }, [printHistory]);
+
+    const totalPages = Math.ceil(filteredHistory.length / rowsPerPage);
+    const currentData = filteredHistory.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
 
     return (
-        <div className="flex flex-1 mx-20 my-2 p-1 w-full">
-            <div>
-                <h1 className="m-1 text-2xl font-bold">Lịch sử in ấn</h1>
-                <h2 className="m-1 text-lg font-bold">Thời gian</h2>
-                <div className="m-1">
-                    <label className="m-1">
-                        Ngày bắt đầu:
-                        <input
+        <div className="flex flex-col space-y-4 p-8 h-full justify-start items-start">
+            <h1 className="text-2xl font-bold">Lịch sử in ấn</h1>
+            <div className="space-y-2">
+                <h2 className="text-lg font-bold">Thời gian</h2>
+                <div className="flex space-x-4">
+                    <div className="flex items-center space-x-2">
+                        <label>Ngày bắt đầu:</label>
+                        <Input
                             type="date"
-                            className="bg-gray-300 rounded-md m-1"
+                            className="bg-gray-100"
                             onChange={(e) => setStartDate(e.target.value)}
                         />
-                    </label>
-                    <label className="m-1">
-                        Ngày kết thúc:
-                        <input
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <label>Ngày kết thúc:</label>
+                        <Input
                             type="date"
-                            className="bg-gray-300 rounded-md m-1"
+                            className="bg-gray-100"
                             onChange={(e) => setEndDate(e.target.value)}
                         />
-                    </label>
+                    </div>
                 </div>
-                <Button
-                    className=" text-white bg-main m- hover:bg-[#030391]/90"
-                    onClick={handleSearch}>
-                    Tìm kiếm
-                </Button>
+                <div className="flex justify-start items-center space-x-4">
+                    <Button
+                        className="bg-[#030391] hover:bg-[#030391]/90 text-white"
+                        onClick={handleSearch}>
+                        Tìm kiếm
+                    </Button>
+                    <Button
+                        className="bg-[#030391] hover:bg-[#030391]/90 text-white"
+                        onClick={handleReset}>
+                        Đặt lại
+                    </Button>
+                </div>
+            </div>
 
-                <h2 className="m-1 text-lg font-bold">Lịch sử in</h2>
-                <table className="m-1">
-                    <thead>
-                        <tr className="bg-main text-white">
-                            <th className="border border-white p-2">
+            <div className="space-y-2">
+                <h2 className="text-lg font-bold">Lịch sử in</h2>
+                <Table className="w-[1000px]">
+                    <TableHeader className="h-[38px]">
+                        <TableRow className="bg-main hover:bg-main text-white h-[38px]">
+                            <TableHead className="text-white">
                                 Thời gian
-                            </th>
-                            <th className="border border-white p-2">Máy in</th>
-                            <th className="border border-white p-2">
+                            </TableHead>
+                            <TableHead className="text-white">Cơ sở</TableHead>
+                            <TableHead className="text-white">Máy in</TableHead>
+                            <TableHead className="text-white">
                                 Tên file in
-                            </th>
-                            <th className="border border-white p-2">
+                            </TableHead>
+                            <TableHead className="text-white">
                                 Kích thước in
-                            </th>
-                            <th className="border border-white p-2">
+                            </TableHead>
+                            <TableHead className="text-white">
                                 Số lượng giấy
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                            </TableHead>
+                            <TableHead className="text-white">
+                                Trạng thái
+                            </TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody className="items-start">
                         {currentData.map((item, index) => (
-                            <tr key={index} className="text-center">
-                                <td className="border border-black p-2">
-                                    {item.time}
-                                </td>
-                                <td className="border border-black p-2">
-                                    {item.printer}
-                                </td>
-                                <td className="border border-black p-2">
+                            <TableRow key={index} className="h-[38px]">
+                                <TableCell className="align-top">
+                                    {format(
+                                        new Date(item.at),
+                                        "dd/MM/yyyy HH:mm"
+                                    )}
+                                </TableCell>
+                                <TableCell className="align-top">
+                                    {item.campus === "cs1"
+                                        ? "Lý Thường Kiệt"
+                                        : "Dĩ An"}
+                                </TableCell>
+                                <TableCell className="align-top">
+                                    {item.printerId}
+                                </TableCell>
+                                <TableCell className="line-clamp-1 max-w-[300px] align-top whitespace-nowrap">
                                     {item.fileName}
-                                </td>
-                                <td className="border border-black p-2">
-                                    {item.size}
-                                </td>
-                                <td className="border border-black p-2">
-                                    {item.pages}
-                                </td>
-                            </tr>
+                                </TableCell>
+                                <TableCell className="align-top">
+                                    {item.specifications.size}
+                                </TableCell>
+                                <TableCell className="align-top">
+                                    {item.totalPages}
+                                </TableCell>
+                                <TableCell className="align-top">
+                                    {item.status === "pending"
+                                        ? "Chờ xác nhận"
+                                        : item.status === "completed"
+                                        ? "Đã hoàn thành"
+                                        : "Đã bị từ chối"}
+                                </TableCell>
+                            </TableRow>
                         ))}
-                    </tbody>
-                </table>
-                <div className="flex justify-end m-2 space-x-2">
+                    </TableBody>
+                </Table>
+            </div>
+
+            <Pagination>
+                <PaginationContent>
                     {Array.from({ length: totalPages }, (_, index) => (
-                        <Button
-                            key={index}
-                            className={`px-3 py-1 ${
-                                currentPage === index + 1
-                                    ? "bg-main text-white"
-                                    : "bg-gray-300 text-black"
-                            }`}
-                            onClick={() => handlePageChange(index + 1)}>
-                            {index + 1}
-                        </Button>
+                        <PaginationItem key={index}>
+                            <PaginationLink
+                                className={
+                                    currentPage === index + 1
+                                        ? "bg-[#030391] hover:bg-[#030391]/90 text-white"
+                                        : ""
+                                }
+                                onClick={() => setCurrentPage(index + 1)}>
+                                {index + 1}
+                            </PaginationLink>
+                        </PaginationItem>
                     ))}
+                </PaginationContent>
+            </Pagination>
+            <div className="flex w-full justify-between items-center space-x-4">
+                <div>
+                    <h2 className="text-lg font-bold">Số lượng giấy đã in</h2>
+                    <p>Giấy A4: {totalA4}</p>
+                    <p>Giấy A3: {totalA3}</p>
                 </div>
-                <h2 className="m-1 text-lg font-bold">Số lượng giấy đã in</h2>
-                <p className="m-1 text-base">Giấy A4: {totalA4}</p>
-                <p className="m-1 text-base">Giấy A3: {totalA3}</p>
+                <div>
+                    <h2 className="text-lg font-bold">Số lượng giấy còn lại</h2>
+                    <p>Giấy A4: {totalA4Left}</p>
+                    <p>Giấy A3: {totalA3Left}</p>
+                </div>
             </div>
         </div>
     );
-};
-
-export default page;
+}
