@@ -22,7 +22,7 @@ Secondly, run the development server:
 npm run dev
 ```
 
-Thirdly, build and start the project:
+After done developing, shutdown dev environment by ```Ctrl + C``` and build then start the project:
 ```bash
 npm run build
 npm run start
