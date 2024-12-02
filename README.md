@@ -1,8 +1,8 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
-FE:
-First, go to FE folder, install all dependencies:
+### FE:
+Firstly, go to FE folder, install all dependencies:
 ```bash
 npm i -f
 ```
@@ -16,12 +16,18 @@ NEXT_PUBLIC_FILE_UPLOAD_API_URL="https://tyv91o1ov3.execute-api.ap-southeast-2.a
 NEXT_PUBLIC_FILE_DOWNLOAD_API_URL="https://tyv91o1ov3.execute-api.ap-southeast-2.amazonaws.com/v1/filestoprint"
 ```
 
-Second, run the development server:
+Secondly, run the development server:
 
 ```bash
 npm run dev
 ```
-BE: 
+
+After done developing, shutdown dev environment by ```Ctrl + C``` and build then start the project:
+```bash
+npm run build
+npm run start
+```
+### BE: 
 We use fastAPI to get and post data. After run the server successfully, you can access http://localhost:8000/docs for document or test API.
 First, go to BE folder, install all dependencies:
 ```bash
