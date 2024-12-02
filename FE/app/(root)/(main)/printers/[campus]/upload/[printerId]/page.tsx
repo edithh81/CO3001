@@ -127,18 +127,35 @@ export default function page() {
 
     const onDrop = async (acceptedFiles: File[]) => {
         if (acceptedFiles.length > 0) {
-            setIsDropped(true);
             const file = acceptedFiles[0];
+            const fileType = file.name.split(".").pop()?.toLowerCase();
+
+            if (!allowFileTypes.includes(fileType)) {
+                console.log(allowFileTypes, fileType);
+                setFileError(
+                    "Invalid file type. Allowed types are: " +
+                        allowFileTypes.join(", ")
+                );
+                setIsDropped(false);
+                setIsPDF(false);
+                toast({
+                    title: "Thất bại",
+                    description: "File không hợp lệ",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            setIsDropped(true);
+            setFileError(null);
+            setFileName(file.name);
 
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
             const fileList = dataTransfer.files;
 
-            // Set the value using the proper FileList object
             setValue("file", fileList);
-            setFileError(null);
-            setFileName(file.name);
-            const fileType = file.name.split(".").pop()?.toLowerCase();
+
             if (pdfjs && fileType === "pdf") {
                 setIsPDF(true);
                 const count = await calculatePageCount(pdfjs, file);

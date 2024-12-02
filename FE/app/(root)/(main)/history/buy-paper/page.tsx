@@ -44,6 +44,7 @@ export default function BuyPaperHistory() {
                 console.error(data.error);
                 return;
             }
+            data.data.sort((a, b) => (a.orderId > b.orderId ? -1 : 1));
             setPaperOrders(data.data);
             setFilteredOrders(data.data);
             calculateTotals(data.data);
@@ -112,7 +113,7 @@ export default function BuyPaperHistory() {
                 <div className="w-[1000px]">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-[#030391] text-white h-[38px]">
+                            <TableRow className="bg-[#030391] hover:bg-[#030391] text-white h-[38px]">
                                 <TableHead className="text-white">
                                     Thời gian
                                 </TableHead>

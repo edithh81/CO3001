@@ -44,6 +44,7 @@ export default function PrintHistory() {
                 console.error(data.error);
                 return;
             }
+            data.data.sort((a, b) => (a.orderId > b.orderId ? -1 : 1));
             setPrintHistory(data.data);
             setFilteredHistory(data.data);
         });
@@ -141,7 +142,7 @@ export default function PrintHistory() {
                 <h2 className="text-lg font-bold">Lịch sử in</h2>
                 <Table className="w-[1000px]">
                     <TableHeader className="h-[38px]">
-                        <TableRow className="bg-main hover:bg-main text-white h-[38px]">
+                        <TableRow className="bg-main hover:bg-[#030391] text-white h-[38px]">
                             <TableHead className="text-white">
                                 Thời gian
                             </TableHead>

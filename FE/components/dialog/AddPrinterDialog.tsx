@@ -80,7 +80,7 @@ export default function AddPrinterDialog({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Add New Printer</DialogTitle>
+                    <DialogTitle>Thêm máy in mới</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form
@@ -91,7 +91,7 @@ export default function AddPrinterDialog({
                             name="campusId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Campus</FormLabel>
+                                    <FormLabel>Cơ sở</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         defaultValue={field.value}>
@@ -102,10 +102,10 @@ export default function AddPrinterDialog({
                                         </FormControl>
                                         <SelectContent>
                                             <SelectItem value="cs1">
-                                                Campus 1
+                                                Lý Thường Kiệt
                                             </SelectItem>
                                             <SelectItem value="cs2">
-                                                Campus 2
+                                                Dĩ An
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -118,7 +118,7 @@ export default function AddPrinterDialog({
                             name="room"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Room</FormLabel>
+                                    <FormLabel>Phòng</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder="Enter room number"
@@ -134,7 +134,7 @@ export default function AddPrinterDialog({
                             name="model"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Model</FormLabel>
+                                    <FormLabel>Mẫu máy in</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder="Enter printer model"
@@ -150,7 +150,7 @@ export default function AddPrinterDialog({
                             name="type"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel>Type</FormLabel>
+                                    <FormLabel>Loại</FormLabel>
                                     <div className="flex space-x-4">
                                         {["bw", "color"].map((type) => (
                                             <FormField
@@ -192,8 +192,8 @@ export default function AddPrinterDialog({
                                                         </FormControl>
                                                         <FormLabel className="font-normal">
                                                             {type === "bw"
-                                                                ? "Black & White"
-                                                                : "Color"}
+                                                                ? "Trắng đen"
+                                                                : "Màu"}
                                                         </FormLabel>
                                                     </FormItem>
                                                 )}
@@ -209,7 +209,7 @@ export default function AddPrinterDialog({
                             name="functional"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel>Functions</FormLabel>
+                                    <FormLabel>Tính năng</FormLabel>
                                     <div className="flex space-x-4">
                                         {["single", "double", "scan"].map(
                                             (func) => (
@@ -253,10 +253,10 @@ export default function AddPrinterDialog({
                                                             <FormLabel className="font-normal">
                                                                 {func ===
                                                                 "single"
-                                                                    ? "Single-sided"
+                                                                    ? "Một mặt"
                                                                     : func ===
                                                                       "double"
-                                                                    ? "Double-sided"
+                                                                    ? "Hai mặt"
                                                                     : "Scan"}
                                                             </FormLabel>
                                                         </FormItem>
@@ -269,7 +269,11 @@ export default function AddPrinterDialog({
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit">Add Printer</Button>
+                        <Button
+                            type="submit"
+                            className="bg-main hover:bg-[#030391]">
+                            Thêm máy in
+                        </Button>
                     </form>
                 </Form>
             </DialogContent>
