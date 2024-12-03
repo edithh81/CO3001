@@ -22,6 +22,7 @@ import { PrintingOrderTrue } from "@/types";
 import { getOrderPrintingByStudentId } from "@/services/PrintingOrderService";
 import { useAuth } from "@/context/AuthContext";
 import { getStudentInfo } from "@/services/StudentService";
+import Link from "next/link";
 export default function PrintHistory() {
     const { studentInfo } = useAuth();
     const studentId = studentInfo.studentId;
@@ -143,6 +144,7 @@ export default function PrintHistory() {
                 <Table className="w-[1000px]">
                     <TableHeader className="h-[38px]">
                         <TableRow className="bg-main hover:bg-[#030391] text-white h-[38px]">
+                            <TableHead className="text-white">Đơn in</TableHead>
                             <TableHead className="text-white">
                                 Thời gian
                             </TableHead>
@@ -160,11 +162,17 @@ export default function PrintHistory() {
                             <TableHead className="text-white">
                                 Trạng thái
                             </TableHead>
+                            <TableHead className="text-white">
+                                Chi tiết
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody className="items-start">
                         {currentData.map((item, index) => (
                             <TableRow key={index} className="h-[38px]">
+                                <TableCell className="align-top">
+                                    {item.orderId}
+                                </TableCell>
                                 <TableCell className="align-top">
                                     {format(
                                         new Date(item.at),
@@ -194,6 +202,13 @@ export default function PrintHistory() {
                                         : item.status === "completed"
                                         ? "Đã hoàn thành"
                                         : "Đã bị từ chối"}
+                                </TableCell>
+                                <TableCell>
+                                    <Link
+                                        className="underline hover:text-slate-500"
+                                        href={`/success/printing/${item.orderId}`}>
+                                        Xem
+                                    </Link>
                                 </TableCell>
                             </TableRow>
                         ))}

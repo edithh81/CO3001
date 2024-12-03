@@ -48,7 +48,7 @@ export default function PrintingOrderViewCard({
                                 ? "Đang chờ"
                                 : status === "completed"
                                 ? "Đã hoàn thành"
-                                : "Đã hủy"}
+                                : "Bị từ chối"}
                         </Badge>
                     </div>
                 </CardTitle>
@@ -130,7 +130,7 @@ export default function PrintingOrderViewCard({
                                 ? "Đang chờ"
                                 : status === "completed"
                                 ? "Đã hoàn thành"
-                                : "Đã bị huỷ"}
+                                : "Bị từ chối"}
                         </p>
                     </div>
                 </div>

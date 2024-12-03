@@ -126,7 +126,7 @@ export default function AdminPrintingOrderViewCard({
                                 ? "Đang chờ"
                                 : status === "completed"
                                 ? "Đã hoàn thành"
-                                : "Đã bị huỷ"}
+                                : "Bị từ chối"}
                         </p>
                     </div>
                 </div>

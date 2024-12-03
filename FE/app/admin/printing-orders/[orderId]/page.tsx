@@ -54,6 +54,7 @@ const page = () => {
     const handleReject = async (comment: string) => {
         await updateOrderStatus(Number(orderId), "rejected", comment);
         console.log("Order rejected", comment);
+        router.push("/admin/printing-orders");
     };
 
     if (!orderDetail) {

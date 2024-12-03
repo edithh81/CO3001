@@ -38,6 +38,7 @@ import {
     getPrintingSpecifications,
 } from "@/services/AdminService";
 import { PrintingSpecs } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
 const fileTypes = [
     { id: "pdf", label: "PDF" },
@@ -49,7 +50,7 @@ const fileTypes = [
 
 export default function PrintingSpecsPage() {
     const [initSpec, setInitSpec] = useState<PrintingSpecs | null>(null);
-
+    const { toast } = useToast();
     function onSubmit(data: PrintingSpecsFormValues) {
         console.log(data);
         const { resetStartDate, resetEndDate, ...rest } = data;
@@ -57,6 +58,11 @@ export default function PrintingSpecsPage() {
             ...rest,
             resetStartDate: resetStartDate.toISOString(),
             resetEndDate: resetEndDate.toISOString(),
+        });
+        toast({
+            title: "Thành công",
+            description: "Cài đặt đã được cập nhật",
+            variant: "default",
         });
     }
 

@@ -191,7 +191,7 @@ export default function Page() {
                                         ? "Đang chờ"
                                         : order.status === "completed"
                                         ? "Đã hoàn thành"
-                                        : "Đã huỷ"}
+                                        : "Bị từ chối"}
                                 </TableCell>
                                 <TableCell>
                                     {new Date(order.at).toLocaleString()}
@@ -247,7 +247,7 @@ export default function Page() {
                                                         : order.status ==
                                                           "completed"
                                                         ? "Đã hoàn thành"
-                                                        : "Đã huỷ"
+                                                        : "Bị từ chối"
                                                 }
                                             />
                                         </SelectTrigger>
@@ -259,7 +259,7 @@ export default function Page() {
                                                 Đã hoàn thành
                                             </SelectItem>
                                             <SelectItem value="rejected">
-                                                Đã huỷ
+                                                Bị từ chối
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>

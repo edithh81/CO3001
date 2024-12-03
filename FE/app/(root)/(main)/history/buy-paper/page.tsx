@@ -23,6 +23,7 @@ import { formatPrice } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { getOrderBuyPaperByStudentId } from "@/services/PaperOrderService";
 import { get } from "node:https";
+import Link from "next/link";
 
 export default function BuyPaperHistory() {
     const { studentInfo } = useAuth();
@@ -115,6 +116,9 @@ export default function BuyPaperHistory() {
                         <TableHeader>
                             <TableRow className="bg-[#030391] hover:bg-[#030391] text-white h-[38px]">
                                 <TableHead className="text-white">
+                                    Đơn mua
+                                </TableHead>
+                                <TableHead className="text-white">
                                     Thời gian
                                 </TableHead>
                                 <TableHead className="text-white">
@@ -135,11 +139,17 @@ export default function BuyPaperHistory() {
                                 <TableHead className="text-white">
                                     Phương thức
                                 </TableHead>
+                                <TableHead className="text-white">
+                                    Chi tiết
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody className="relative">
                             {currentData.map((item, index) => (
                                 <TableRow key={index} className="h-[38px]">
+                                    <TableCell className="align-top">
+                                        {item.orderId}
+                                    </TableCell>
                                     <TableCell className="align-top">
                                         {format(
                                             new Date(item.at),
@@ -169,6 +179,13 @@ export default function BuyPaperHistory() {
                                         {item.method === "cash"
                                             ? "Tiền mặt"
                                             : "BKPay"}
+                                    </TableCell>
+                                    <TableCell className="align-top">
+                                        <Link
+                                            href={`/success/buy-paper/${item.orderId}`}
+                                            className="underline hover:text-slate-500">
+                                            Xem
+                                        </Link>
                                     </TableCell>
                                 </TableRow>
                             ))}
