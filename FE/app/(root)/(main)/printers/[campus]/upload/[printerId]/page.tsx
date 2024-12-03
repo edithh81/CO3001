@@ -38,6 +38,14 @@ import { getPrinterSpec } from "@/services/PrinterService";
 
 //const allowFileTypes = [".pdf", ".doc", ".docx"];
 
+const mimeTypes = {
+    pdf: "application/pdf",
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    png: "image/png",
+    jpg: "image/jpeg",
+};
+
 type PrinterSpec = Pick<printerDetail["info"], "type" | "functional">;
 
 export default function page() {
@@ -50,6 +58,7 @@ export default function page() {
     const [fileError, setFileError] = useState<string | null>(null);
     const [fileName, setFileName] = useState<string | null>(null);
     const [allowFileTypes, setAllowFileTypes] = useState<string[]>([]);
+    const [accept, setAccept] = useState();
     const [pageLeft, setPageLeft] = useState<{ A3: number; A4: number }>();
     const [fileId, setFileId] = useState<string>("");
     const [selectedSize, setSelectedSize] = useState<"A4" | "A3">("A4");
@@ -104,6 +113,16 @@ export default function page() {
             functional: ["single", "double", "scan"],
         }); */
     }, []);
+
+    useEffect(() => {
+        const accepts = allowFileTypes.reduce((acc, type) => {
+            if (mimeTypes[type]) {
+                acc[mimeTypes[type]] = [`.${type}`];
+            }
+            return acc;
+        }, {});
+        setAccept(accepts);
+    }, [allowFileTypes]);
 
     const {
         register,
@@ -168,12 +187,7 @@ export default function page() {
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
-        accept: {
-            "application/pdf": [".pdf"],
-            "application/msword": [".doc"],
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                [".docx"],
-        },
+        accept,
         maxFiles: 1,
     });
 
