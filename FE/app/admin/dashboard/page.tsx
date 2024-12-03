@@ -1,6 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+    CardFooter,
+} from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { getPrintersByCampus } from "@/services/PrinterService";
 import { getTotalOrderPrinting } from "@/services/PrintingOrderService";
@@ -14,6 +21,12 @@ import {
 } from "@/types";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Pie, PieChart, Cell, LabelList } from "recharts";
+import {
+    ChartContainer,
+    ChartTooltip,
+    ChartTooltipContent,
+} from "@/components/ui/chart";
 import {
     Table,
     TableBody,
@@ -22,15 +35,34 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { ColStatistic, PieStatistic, lastPeriodDays } from "@/lib/utils";
+import { set } from "date-fns";
 type overview = {
     title: string;
     value: string;
     subValue?: string;
 };
 
-type statistic = {
-    date: string;
-    total: number;
+const chartConfig = {
+    completed: {
+        label: "Completed",
+        color: "#4bf542",
+    },
+    pending: {
+        label: "Pending",
+        color: "hsl(48, 96%, 53%)", // Yellow
+    },
+    rejected: {
+        label: "Rejected",
+        color: "hsl(0, 84%, 60%)", // Slightly red
+    },
 };
 
 const page = () => {
@@ -39,9 +71,11 @@ const page = () => {
     const [printerCS2, setPrinterCS2] = useState<printerDetail[]>([]);
     const [totalPrinting, setTotalPrinting] = useState<PrintingOrderTrue[]>([]);
     const [totalPaper, setTotalPaper] = useState<BuyPaperOrderTrue[]>([]);
-    const [printOrderData, setPrintOrderData] = useState<statistic[]>([]);
-    const [paperOrderData, setPaperOrderData] = useState<statistic[]>([]);
-
+    const [printOrderData, setPrintOrderData] = useState<ColStatistic[]>([]);
+    const [paperOrderData, setPaperOrderData] = useState<ColStatistic[]>([]);
+    const [piePrintingData, setPiePrintingData] = useState<PieStatistic[]>([]);
+    const [piePaperData, setPiePaperData] = useState<PieStatistic[]>([]);
+    const [period, setPeriod] = useState<number>(7);
     const router = useRouter();
 
     // all mock datas for now
@@ -144,43 +178,19 @@ const page = () => {
     }, [printerCS1, printerCS2, totalPrinting, totalPaper]);
 
     useEffect(() => {
-        function last7Days(
-            total: PrintingOrder[] | BuyPaperOrder[]
-        ): statistic[] {
-            const statistics: statistic[] = [];
-            const currentDate = new Date();
-
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(currentDate);
-                date.setDate(currentDate.getDate() - i);
-
-                const formattedDate = date.toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                });
-
-                const ordersForDate = total.filter((order) => {
-                    const orderDate = new Date(order.at);
-                    return (
-                        orderDate.getDate() === date.getDate() &&
-                        orderDate.getMonth() === date.getMonth() &&
-                        orderDate.getFullYear() === date.getFullYear()
-                    );
-                });
-
-                statistics.push({
-                    date: formattedDate,
-                    total: ordersForDate.length,
-                });
-            }
-
-            return statistics;
-        }
-
-        setPrintOrderData(last7Days(totalPrinting));
-        setPaperOrderData(last7Days(totalPaper));
-    }, [totalPrinting, totalPaper]);
+        setPrintOrderData(
+            lastPeriodDays(totalPrinting, period, "col") as ColStatistic[]
+        );
+        setPaperOrderData(
+            lastPeriodDays(totalPaper, period, "col") as ColStatistic[]
+        );
+        setPiePrintingData(
+            lastPeriodDays(totalPrinting, period, "pie") as PieStatistic[]
+        );
+        setPiePaperData(
+            lastPeriodDays(totalPaper, period, "pie") as PieStatistic[]
+        );
+    }, [totalPrinting, totalPaper, period]);
     return (
         <div className="flex w-full h-full">
             <div className="p-6 flex flex-col space-y-4 w-full">
@@ -208,10 +218,24 @@ const page = () => {
                         ))}
                     </div>
                 </div>
+                <div>
+                    <Select
+                        value={period.toString()}
+                        onValueChange={(value) => setPeriod(parseInt(value))}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select period" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="7">7 ngày qua</SelectItem>
+                            <SelectItem value="30">30 ngày qua</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Các đơn in (7 ngày qua)</CardTitle>
+                            <CardTitle>Các đơn in</CardTitle>
+                            <CardDescription>{period} ngày qua</CardDescription>
                         </CardHeader>
                         <CardContent className="pt-2">
                             <ResponsiveContainer width="100%" height={300}>
@@ -240,7 +264,8 @@ const page = () => {
                     </Card>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Các đơn mua giấy (7 ngày qua)</CardTitle>
+                            <CardTitle>Các đơn mua giấy</CardTitle>
+                            <CardDescription>{period} ngày qua</CardDescription>
                         </CardHeader>
                         <CardContent className="pt-2">
                             <ResponsiveContainer width="100%" height={300}>
@@ -266,6 +291,134 @@ const page = () => {
                                 </BarChart>
                             </ResponsiveContainer>
                         </CardContent>
+                    </Card>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Trạng thái các đơn in</CardTitle>
+                            <CardDescription>{period} ngày qua</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ChartContainer
+                                config={chartConfig}
+                                className="mx-auto aspect-square h-[300px]">
+                                <PieChart>
+                                    <ChartTooltip
+                                        content={<ChartTooltipContent />}
+                                    />
+                                    <Pie
+                                        data={piePrintingData}
+                                        dataKey="total"
+                                        nameKey="status"
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={150}
+                                        label>
+                                        {piePrintingData.map((entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={
+                                                    chartConfig[entry.status]
+                                                        .color
+                                                }
+                                            />
+                                        ))}
+                                        <LabelList
+                                            dataKey="status"
+                                            position="outside"
+                                            className="fill-foreground"
+                                            formatter={(
+                                                value: keyof typeof chartConfig
+                                            ) => chartConfig[value].label}
+                                        />
+                                    </Pie>
+                                </PieChart>
+                            </ChartContainer>
+                        </CardContent>
+                        <CardFooter className="flex justify-between text-sm text-muted-foreground">
+                            <div>
+                                Đã hoàn thành:{" "}
+                                {piePrintingData.find(
+                                    (d) => d.status === "completed"
+                                )?.total || 0}
+                            </div>
+                            <div>
+                                Đang chờ:{" "}
+                                {piePrintingData.find(
+                                    (d) => d.status === "pending"
+                                )?.total || 0}
+                            </div>
+                            <div>
+                                Đã từ chối:{" "}
+                                {piePrintingData.find(
+                                    (d) => d.status === "rejected"
+                                )?.total || 0}
+                            </div>
+                        </CardFooter>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Trạng thái các đơn mua giấy</CardTitle>
+                            <CardDescription>{period} ngày qua</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ChartContainer
+                                config={chartConfig}
+                                className="mx-auto aspect-square h-[300px]">
+                                <PieChart>
+                                    <ChartTooltip
+                                        content={<ChartTooltipContent />}
+                                    />
+                                    <Pie
+                                        data={piePaperData}
+                                        dataKey="total"
+                                        nameKey="status"
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={150}
+                                        label>
+                                        {piePaperData.map((entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={
+                                                    chartConfig[entry.status]
+                                                        .color
+                                                }
+                                            />
+                                        ))}
+                                        <LabelList
+                                            dataKey="status"
+                                            position="outside"
+                                            className="fill-foreground"
+                                            formatter={(
+                                                value: keyof typeof chartConfig
+                                            ) => chartConfig[value].label}
+                                        />
+                                    </Pie>
+                                </PieChart>
+                            </ChartContainer>
+                        </CardContent>
+                        <CardFooter className="flex justify-between text-sm text-muted-foreground">
+                            <div>
+                                Đã hoàn thành:{" "}
+                                {piePaperData.find(
+                                    (d) => d.status === "completed"
+                                )?.total || 0}
+                            </div>
+                            <div>
+                                Đang chờ:{" "}
+                                {piePaperData.find(
+                                    (d) => d.status === "pending"
+                                )?.total || 0}
+                            </div>
+                            <div>
+                                Đã từ chối:{" "}
+                                {piePaperData.find(
+                                    (d) => d.status === "rejected"
+                                )?.total || 0}
+                            </div>
+                        </CardFooter>
                     </Card>
                 </div>
                 <div className="grid gap-6 mt-6">
