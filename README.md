@@ -11,7 +11,8 @@ For a quick demo of how the system works, check out the [YouTube video demo](htt
 | 4   | Võ Hoàng Huy       | 2211298    |
 | 5   | Võ Phương Minh Nhật       | 2212413   |
 | 6   | Võ Thanh Tâm       | 2213046    |
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 ### FE:
